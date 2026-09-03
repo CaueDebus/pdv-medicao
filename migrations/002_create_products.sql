@@ -1,0 +1,12 @@
+CREATE TABLE products (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(160) NOT NULL,
+    category VARCHAR(80) NOT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0,
+    stock_qty INT NOT NULL DEFAULT 0,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_products_category (category),
+    INDEX idx_products_stock (stock_qty)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
