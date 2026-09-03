@@ -2,6 +2,8 @@
 
 Este guia descreve como subir o projeto localmente, aplicar as migrações e acessar o sistema com o usuário inicial.
 
+Para entender em detalhes o funcionamento interno do runner, veja [sistema-de-migracoes.md](sistema-de-migracoes.md).
+
 ## Pré-requisitos
 
 - PHP 8.2 ou superior
@@ -26,7 +28,23 @@ set DB_USERNAME=root
 set DB_PASSWORD=sua_senha
 ```
 
-2. Aplique as migrações na ordem dos arquivos em `migrations/`.
+2. Aplique as migrações com o comando único:
+
+```bash
+php scripts/migrate.php up
+```
+
+Se quiser conferir o controle:
+
+```bash
+php scripts/migrate.php status
+```
+
+Se precisar desfazer o último batch:
+
+```bash
+php scripts/migrate.php down
+```
 
 3. Crie o admin inicial:
 

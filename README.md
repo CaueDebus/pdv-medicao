@@ -10,15 +10,35 @@ Base inicial full stack em PHP para o ComandaFlex, organizada para crescer em m�
 - `config/`: configuração da aplicação e do banco.
 - `migrations/`: migrações MySQL em SQL puro.
 - `docs/`: documentação funcional e de reúso.
+- `docs/`: documentação funcional, de reúso e de migrações.
 
 ## Como rodar
 
 1. Aponte o servidor local do PHP para `public/`.
 2. Ajuste as variáveis `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` se for usar MySQL.
-3. Execute as migrações SQL na ordem dos arquivos em `migrations/`.
+3. Execute as migrações com o comando único.
 4. Rode o seed inicial do admin.
 
 O passo a passo completo ficou em [docs/como-rodar.md](docs/como-rodar.md).
+Detalhes do runner e do rollback estão em [docs/sistema-de-migracoes.md](docs/sistema-de-migracoes.md).
+
+Comando único de migração:
+
+```bash
+php scripts/migrate.php up
+```
+
+Rollback do último batch:
+
+```bash
+php scripts/migrate.php down
+```
+
+Status das migrations:
+
+```bash
+php scripts/migrate.php status
+```
 
 Exemplo com servidor embutido do PHP:
 
