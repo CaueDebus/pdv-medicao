@@ -73,12 +73,25 @@ http://localhost:8000
 
 Se o banco ainda não estiver disponível, a tela de login aceita as mesmas credenciais acima para permitir navegação local imediata.
 
+## Rodar os testes
+
+Não precisa de MySQL nem de `composer install`:
+
+```bash
+php scripts/test.php            # tudo
+php scripts/test.php Unit       # só unidade
+php scripts/test.php Feature    # só feature
+```
+
+Exit code 0 = tudo verde. Ver [testes.md](testes.md).
+
 ## Comandos úteis
 
 ```bash
 php -l app/Controllers/AuthController.php
 php -l app/Controllers/PageController.php
 php -S localhost:8000 -t public
+php scripts/test.php
 ```
 
 ## Observações

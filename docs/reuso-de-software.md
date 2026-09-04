@@ -13,6 +13,7 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 - `reuso-acesso-por-perfil`: parcial, a navegação já diferencia operador e admin, mas autenticação real ainda não existe.
 - `reuso-migrations-sql-puro`: sim, o schema é versionado com SQL puro para facilitar leitura, revisão e rollback.
 - `reuso-seed-admin`: sim, o usuário inicial é criado por seed para acelerar a entrada no sistema.
+- `reuso-testes-basetest`: sim, todos os testes estendem `Tests\BaseTest`, reaproveitando asserções e ciclo de vida em vez de cada teste montar seu próprio scaffold.
 - `reuso-documentacao-viva`: sim, toda mudança relevante deve refletir em documentação do projeto.
 
 ## Importância Dos Padrões
@@ -50,6 +51,7 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 - `reuso-futuras-migrations`: novas tabelas devem vir com migration, down migration e atualização do runner quando necessário.
 - `reuso-futuro-seed`: se a feature precisar de dados de apoio, deve ter seed documentado e reversível quando fizer sentido.
 - `reuso-futuro-dashboard`: métricas novas devem reaproveitar blocos de resumo e não criar um sistema paralelo de indicadores.
+- `reuso-futuros-testes`: toda feature nova entra com teste que estende `Tests\BaseTest`; asserção que falte é adicionada na própria base, sem utilitário de teste paralelo.
 
 ## Padrões de projeto adotados
 
@@ -75,6 +77,13 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 
 - `NavigationVisibilityStrategy`: define como a navegação é decorada para cada perfil.
 - `OperatorNavigationStrategy` e `AdminNavigationStrategy`: alteram bloqueios e estados da navegação sem mudar o layout.
+
+### Base de testes (Template Method + reúso de asserções)
+
+- `Tests\BaseTest`: concentra as asserções e o ciclo `setUp`/`run`/`tearDown`. Cada classe de teste só descreve os casos, no padrão Arrange/Act/Assert.
+- `Tests\TestRunner`: descobre os arquivos `*Test.php` e executa, sem depender de PHPUnit/Composer.
+- `tests/bootstrap.php`: fixa o ambiente (banco offline = modo demo) para os testes serem determinísticos.
+- Ver [docs/testes.md](testes.md).
 
 ## Razões de reúso
 

@@ -52,6 +52,14 @@ Seed do admin:
 php scripts/seed_admin.php
 ```
 
+Testes automatizados (unidade + feature, sem dependências externas):
+
+```bash
+php scripts/test.php
+```
+
+Detalhes e como escrever testes para novas features em [docs/testes.md](docs/testes.md).
+
 Credenciais padrão:
 
 - e-mail: `admin@comandaflex.local`
@@ -71,6 +79,7 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 - Repository para leitura de dados e fallback demo.
 - Strategy para visibilidade da navegação por perfil.
 - Migrações MySQL iniciais para usuários, produtos, pedidos, itens, movimentos de estoque e módulos.
+- Testes de unidade e de feature com runner próprio (`php scripts/test.php`) e classe base `Tests\BaseTest`.
 - Documentação de reúso de software.
 
 ## O que ainda não foi implementado
@@ -78,7 +87,7 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 - CRUD completo persistindo no MySQL para todas as telas.
 - Painel administrativo com edição de permissões.
 - Integração com impressão, NFC-e ou APIs externas.
-- Testes automatizados.
+- Testes de integração com MySQL real.
 - Pipeline de deploy.
 
 ## Próximos passos sugeridos
