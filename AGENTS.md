@@ -28,28 +28,41 @@ O sistema ComandaFlex deve evoluir com o menor acoplamento possível entre camad
 
 ### Singleton
 
-- Uso atual: configuração e banco.
+- Uso atual: configuração, banco e sessão.
 - Importância: centraliza acesso a recursos compartilhados e evita instâncias redundantes dentro da mesma requisição.
 
 ### Template Method
 
-- Uso atual: montagem de telas por tipo de contexto.
-- Importância: garante uma estrutura fixa e reduz duplicação entre telas parecidas.
+- Uso atual: montagem de telas por tipo de contexto (`AbstractScreenTemplate`) e esqueleto de persistência dos CRUDs (`AbstractCrudRepository`).
+- Importância: garante uma estrutura fixa e reduz duplicação — tanto entre telas parecidas quanto entre repositórios que repetiriam o mesmo SQL.
 
 ### Factory
 
-- Uso atual: escolha do template de tela.
-- Importância: desacopla a decisão de criação da classe que consome o objeto.
+- Uso atual: escolha do template de tela (`ScreenFactory`) e escolha do recurso CRUD da rota (`CrudFactory`).
+- Importância: desacopla a decisão de criação da classe que consome o objeto. É o que permite um único `CrudController` atender todas as entidades.
 
 ### Repository
 
-- Uso atual: leitura de dados de produtos, pedidos, módulos e dashboard.
+- Uso atual: persistência de produtos, comandas, movimentações de estoque, módulos, usuários e leitura do dashboard.
 - Importância: separa consulta de dados da regra de apresentação e facilita troca de fallback por MySQL real.
 
 ### Strategy
 
-- Uso atual: visibilidade da navegação por perfil.
+- Uso atual: visibilidade da navegação por perfil (operador, gerente e admin).
 - Importância: permite variar comportamento sem espalhar condicionais pela aplicação.
+
+## Variabilidade E Linha De Produto
+
+- O ponto de variação do produto é a tabela `modules` (`code` + `enabled`), lida por `App\Domain\Variability\FeatureToggle`.
+- O mapa `app.features` em `config/app.php` liga cada tela ao código do módulo que a habilita. Tela sem entrada no mapa é núcleo e está sempre presente.
+- Feature opcional NÃO vira cópia do sistema nem `if` espalhado: vira linha no catálogo de módulos mais uma entrada no mapa.
+- Ao criar uma tela opcional, registre o módulo na migration de seed e o mapeamento em `config/app.php`.
+
+## CRUD
+
+- Não crie controller nem view por entidade. Um CRUD novo é um método novo na `App\Domain\Patterns\Factory\CrudFactory` devolvendo um `CrudResource`.
+- Colunas graváveis são lista branca no repositório; valores sempre por prepared statement; saída sempre escapada; escrita sempre com token CSRF.
+- Repositório de CRUD estende `AbstractCrudRepository` e implementa apenas `table()`, `columns()`, `demoRows()` e, quando necessário, `orderBy()`/`selectSql()`.
 
 ## Testes
 

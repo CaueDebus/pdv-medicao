@@ -73,6 +73,32 @@ http://localhost:8000
 
 Se o banco ainda não estiver disponível, a tela de login aceita as mesmas credenciais acima para permitir navegação local imediata.
 
+Nesse modo as telas de CRUD continuam navegáveis, mas exibem o aviso "Modo demonstração" e **não gravam nada**: a listagem mostra dados de exemplo do repositório. Para exercitar criação, edição e exclusão de verdade, rode as migrações com o MySQL no ar.
+
+## Telas de CRUD
+
+Quatro telas fazem CRUD completo sobre o MySQL, todas servidas pelo mesmo controller e pelas mesmas views:
+
+| Tela | Tabela | Observação |
+| --- | --- | --- |
+| Cardápio | `products` | categorias dependem dos módulos de venda ligados |
+| Comandas | `orders` | status vem do enum da migration |
+| Estoque | `stock_movements` | lista com JOIN em `products` |
+| Módulos | `modules` | é o painel de variabilidade do produto |
+
+Exclusão é restrita: cardápio, comandas e estoque exigem perfil `manager` ou `admin`; módulos exigem `admin`.
+
+## Ligar e desligar módulos (variabilidade)
+
+A migration `007_seed_modules.sql` popula o catálogo de módulos. Para ver a variabilidade funcionando:
+
+1. Entre como `admin` e abra a tela **Módulos**.
+2. Edite o "Módulo Estoque" e desmarque "Ativo nesta instalação".
+3. A tela de Estoque some da navegação e a rota passa a cair no dashboard.
+4. Reative o módulo para trazer a tela de volta.
+
+A tela de Configurações lista quais módulos estão ligados nesta instalação.
+
 ## Rodar os testes
 
 Não precisa de MySQL nem de `composer install`:

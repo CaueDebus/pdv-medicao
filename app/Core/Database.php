@@ -89,4 +89,26 @@ final class Database
 
         return is_array($result) ? $result : null;
     }
+
+    /**
+     * Escrita (INSERT/UPDATE/DELETE). Retorna false quando o banco está
+     * indisponível, para o chamador cair no modo demo sem persistência.
+     */
+    public function execute(string $sql, array $params = []): bool
+    {
+        if (! $this->pdo) {
+            return false;
+        }
+
+        try {
+            return $this->pdo->prepare($sql)->execute($params);
+        } catch (PDOException) {
+            return false;
+        }
+    }
+
+    public function lastInsertId(): int
+    {
+        return $this->pdo ? (int) $this->pdo->lastInsertId() : 0;
+    }
 }

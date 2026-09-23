@@ -32,6 +32,16 @@ Para rollback, cada migration precisa ter um arquivo correspondente:
 
 O runner identifica somente arquivos `.sql` que não terminam com `.down.sql` para o comando de subida.
 
+## Migrations de dados (seed versionado)
+
+Além das migrations de estrutura, o projeto usa migrations de dados quando um catálogo precisa existir para o sistema funcionar. É o caso de `007_seed_modules.sql`, que popula a tabela `modules` — o catálogo de pontos de variação lido por `App\Domain\Variability\FeatureToggle`.
+
+Convenções para esse tipo de migration:
+
+- Use `INSERT ... ON DUPLICATE KEY UPDATE` para que reaplicar não quebre em chave única.
+- O `.down.sql` correspondente remove exatamente as linhas inseridas, filtrando pela chave natural (no caso, `code`).
+- Seed de dados operacionais do cliente continua fora daqui; migration de dados é só para catálogo que o código depende.
+
 ## Como o `up` funciona
 
 Quando você executa:

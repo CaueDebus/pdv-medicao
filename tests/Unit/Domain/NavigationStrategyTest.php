@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain;
 
 use App\Domain\Patterns\Strategy\AdminNavigationStrategy;
+use App\Domain\Patterns\Strategy\ManagerNavigationStrategy;
 use App\Domain\Patterns\Strategy\OperatorNavigationStrategy;
 use Tests\BaseTest;
 
@@ -85,5 +86,38 @@ final class NavigationStrategyTest extends BaseTest
         // Assert
         $this->assertTrue($decorated[2]['active']);
         $this->assertSame('restrito ao gerente/admin', $decorated[2]['reason']);
+    }
+
+    public function testManagerStrategyLocksOnlySettings(): void
+    {
+        // Arrange
+        $strategy = new ManagerNavigationStrategy();
+
+        // Act
+        $decorated = $strategy->decorate($this->items(), 'dashboard');
+        $locked = [];
+        foreach ($decorated as $item) {
+            if ($item['locked'] === true) {
+                $locked[] = $item['key'];
+            }
+        }
+
+        // Assert
+        $this->assertCount(1, $locked);
+        $this->assertContains('configuracoes', $locked);
+    }
+
+    public function testManagerStrategyKeepsReportsOpen(): void
+    {
+        // Arrange
+        $strategy = new ManagerNavigationStrategy();
+
+        // Act
+        $decorated = $strategy->decorate($this->items(), 'relatorios');
+
+        // Assert
+        $this->assertFalse($decorated[2]['locked'], 'gerente enxerga relatórios');
+        $this->assertTrue($decorated[2]['active']);
+        $this->assertSame('restrito ao admin', $decorated[3]['reason']);
     }
 }

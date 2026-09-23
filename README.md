@@ -71,28 +71,39 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 
 - Navegação entre as telas principais: dashboard, cardápio, comandas, estoque, produção, módulos, relatórios e configurações.
 - Layout único compartilhado entre todas as páginas.
-- Singletons para configuração e banco.
 - Autenticação por sessão com login e logout.
-- Perfis `operator`, `manager` e `admin` com visibilidade de navegação por role.
-- Template Method para montagem de telas.
-- Factory para selecionar o template da tela.
-- Repository para leitura de dados e fallback demo.
-- Strategy para visibilidade da navegação por perfil.
-- Migrações MySQL iniciais para usuários, produtos, pedidos, itens, movimentos de estoque e módulos.
+- Perfis `operator`, `manager` e `admin` com visibilidade de navegação e roteamento por role.
+- **CRUD completo persistindo no MySQL** em quatro telas: cardápio (`products`), comandas (`orders`), estoque (`stock_movements`) e módulos (`modules`).
+- Proteção CSRF nas escritas e exclusão restrita por perfil.
+- **Variabilidade em tempo de configuração (LPS):** a tabela `modules` define quais telas o produto entrega nesta instalação.
+- Migrações MySQL para usuários, produtos, pedidos, itens, movimentos de estoque e módulos, mais o seed do catálogo de módulos.
 - Testes de unidade e de feature com runner próprio (`php scripts/test.php`) e classe base `Tests\BaseTest`.
 - Documentação de reúso de software.
 
+### Padrões de projeto aplicados
+
+| Padrão | Exemplos codificados |
+| --- | --- |
+| Singleton | `Config`, `Database`, `Session` |
+| Template Method | `AbstractScreenTemplate` (+ `DashboardTemplate`, `OperationsTemplate`, `ReportsTemplate`) e `AbstractCrudRepository` |
+| Factory | `ScreenFactory` (escolhe o template da tela) e `CrudFactory` (escolhe o recurso CRUD da rota) |
+| Strategy | `OperatorNavigationStrategy`, `ManagerNavigationStrategy`, `AdminNavigationStrategy` |
+| Repository | `Dashboard`, `Product`, `Order`, `StockMovement`, `Module`, `User` |
+
+Detalhes e justificativas em [docs/reuso-de-software.md](docs/reuso-de-software.md).
+
 ## O que ainda não foi implementado
 
-- CRUD completo persistindo no MySQL para todas as telas.
+- Itens da comanda (`order_items`) ainda não têm tela própria.
+- Pagamento e fechamento financeiro da comanda.
 - Painel administrativo com edição de permissões.
 - Integração com impressão, NFC-e ou APIs externas.
-- Testes de integração com MySQL real.
+- Testes de integração com MySQL real (a suíte roda em modo demo, com o banco offline).
 - Pipeline de deploy.
 
 ## Próximos passos sugeridos
 
-1. Criar CRUD real para cardápio, comandas e estoque.
-2. Trocar os dados demo por CRUD real usando as tabelas migradas.
-3. Adicionar testes de integração para rotas e repositórios.
+1. Criar a tela de itens da comanda reaproveitando a `CrudFactory`.
+2. Implementar o fluxo de pagamento e o fechamento da comanda.
+3. Adicionar testes de integração com MySQL real.
 4. Separar a camada de domínio em entidades e casos de uso conforme o sistema crescer.

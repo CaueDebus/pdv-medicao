@@ -9,7 +9,7 @@ use Tests\BaseTest;
 
 final class ModuleRepositoryTest extends BaseTest
 {
-    public function testAllReturnsModulesWithEnabledFlag(): void
+    public function testAllReturnsModuleCatalogWithEnabledFlag(): void
     {
         // Arrange
         $repository = new ModuleRepository();
@@ -18,8 +18,9 @@ final class ModuleRepositoryTest extends BaseTest
         $modules = $repository->all();
 
         // Assert
-        $this->assertCount(3, $modules);
+        $this->assertCount(6, $modules);
         $this->assertArrayHasKey('name', $modules[0]);
+        $this->assertArrayHasKey('code', $modules[0]);
         $this->assertArrayHasKey('enabled', $modules[0]);
         $this->assertArrayHasKey('description', $modules[0]);
     }
@@ -39,5 +40,45 @@ final class ModuleRepositoryTest extends BaseTest
         // Assert
         $this->assertCount(1, $integration);
         $this->assertFalse($integration[0]['enabled']);
+        $this->assertSame('hotel_integration', $integration[0]['code']);
+    }
+
+    public function testEveryModuleHasACodeForTheFeatureMap(): void
+    {
+        // Arrange
+        $repository = new ModuleRepository();
+
+        // Act
+        $modules = $repository->all();
+
+        // Assert
+        foreach ($modules as $module) {
+            $this->assertNotEmpty($module['code'] ?? '', 'módulo sem código não consegue habilitar tela');
+        }
+    }
+
+    public function testWritesAreRejectedWhenDatabaseIsOffline(): void
+    {
+        // Arrange
+        $repository = new ModuleRepository();
+
+        // Act / Assert
+        $this->assertFalse($repository->persists());
+        $this->assertFalse($repository->create(['name' => 'Novo', 'code' => 'novo', 'description' => '', 'enabled' => 1]));
+        $this->assertFalse($repository->update(1, ['enabled' => 0]));
+        $this->assertFalse($repository->delete(1));
+    }
+
+    public function testFindReturnsDemoRowById(): void
+    {
+        // Arrange
+        $repository = new ModuleRepository();
+
+        // Act
+        $module = $repository->find(3);
+
+        // Assert
+        $this->assertNotNull($module);
+        $this->assertSame('stock', $module['code']);
     }
 }

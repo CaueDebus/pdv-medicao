@@ -1,7 +1,16 @@
 <?php
 
 /** @var array<string, mixed> $screen */
+
+$flash = $screen['context']['flash'] ?? null;
+$crud = $screen['context']['crud'] ?? null;
 ?>
+
+<?php if (is_array($flash)): ?>
+    <div class="alert alert-<?= htmlspecialchars((string) ($flash['tone'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
+        <?= htmlspecialchars((string) ($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+    </div>
+<?php endif; ?>
 
 <section class="panel panel-metrics">
     <h2>Resumo rápido</h2>
@@ -40,30 +49,16 @@
     </div>
 </section>
 
+<?php if (is_array($crud)): ?>
+    <?php require __DIR__ . '/../crud/table.php'; ?>
+<?php endif; ?>
+
 <section class="panel panel-data">
     <h2>Dados carregados</h2>
     <?php if (($screen['page'] ?? '') === 'dashboard'): ?>
         <div class="data-grid">
             <div class="data-card"><span>Comandas abertas</span><strong><?= htmlspecialchars((string) ($screen['context']['dashboard']['open_orders'] ?? 0), ENT_QUOTES, 'UTF-8') ?></strong></div>
             <div class="data-card"><span>Produtos em estoque</span><strong><?= htmlspecialchars((string) count($screen['context']['products'] ?? []), ENT_QUOTES, 'UTF-8') ?></strong></div>
-        </div>
-    <?php elseif (($screen['page'] ?? '') === 'cardapio'): ?>
-        <div class="stack-list">
-            <?php foreach (($screen['context']['products'] ?? []) as $product): ?>
-                <article class="stack-item">
-                    <strong><?= htmlspecialchars((string) ($product['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></strong>
-                    <p><?= htmlspecialchars((string) ($product['category'] ?? ''), ENT_QUOTES, 'UTF-8') ?> · R$ <?= number_format((float) ($product['price'] ?? 0), 2, ',', '.') ?> · estoque <?= htmlspecialchars((string) ($product['stock_qty'] ?? 0), ENT_QUOTES, 'UTF-8') ?></p>
-                </article>
-            <?php endforeach; ?>
-        </div>
-    <?php elseif (($screen['page'] ?? '') === 'comandas'): ?>
-        <div class="stack-list">
-            <?php foreach (($screen['context']['orders'] ?? []) as $order): ?>
-                <article class="stack-item">
-                    <strong><?= htmlspecialchars((string) ($order['table_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></strong>
-                    <p><?= htmlspecialchars((string) ($order['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?> · R$ <?= number_format((float) ($order['total_value'] ?? 0), 2, ',', '.') ?> · <?= htmlspecialchars((string) ($order['updated_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                </article>
-            <?php endforeach; ?>
         </div>
     <?php elseif (($screen['page'] ?? '') === 'estoque'): ?>
         <div class="stack-list">
@@ -83,15 +78,6 @@
                 </article>
             <?php endforeach; ?>
         </div>
-    <?php elseif (($screen['page'] ?? '') === 'modulos'): ?>
-        <div class="stack-list">
-            <?php foreach (($screen['context']['modules'] ?? []) as $module): ?>
-                <article class="stack-item">
-                    <strong><?= htmlspecialchars((string) ($module['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></strong>
-                    <p><?= htmlspecialchars((string) ($module['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                </article>
-            <?php endforeach; ?>
-        </div>
     <?php elseif (($screen['page'] ?? '') === 'relatorios'): ?>
         <div class="data-grid">
             <div class="data-card"><span>Total de itens vendidos</span><strong>318</strong></div>
@@ -107,6 +93,14 @@
             <article class="stack-item">
                 <strong>Perfis</strong>
                 <p>Operador, gerente e admin já são previstos no modelo de navegação.</p>
+            </article>
+            <article class="stack-item">
+                <strong>Módulos ligados nesta instalação</strong>
+                <p>
+                    <?php foreach (($screen['context']['features'] ?? []) as $code => $enabled): ?>
+                        <span class="pill <?= $enabled ? 'pill-ok' : 'pill-neutral' ?>"><span class="dot"></span><?= htmlspecialchars((string) $code, ENT_QUOTES, 'UTF-8') ?></span>
+                    <?php endforeach; ?>
+                </p>
             </article>
         </div>
     <?php else: ?>

@@ -317,6 +317,13 @@ main{ flex:1; min-width:0; }
 .module-chip .swdot::after{ content:''; width:14px; height:14px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; }
 .module-chip .swdot.on::after{ left:17px; }
 
+.data-table{ width:100%; border-collapse:collapse; font-size:var(--text-sm); }
+.data-table th, .data-table td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.data-table th{ font-size:var(--text-xs); text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.data-table tr:last-child td{ border-bottom:none; }
+.data-table .col-actions{ white-space:nowrap; }
+.data-table .col-actions .btn{ margin-right:6px; }
+
 .dolist{ display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-4); }
 @media (max-width:700px){ .dolist{ grid-template-columns:1fr; } }
 .do, .dont{ padding:var(--space-4); border-radius:var(--radius-md); font-size:var(--text-sm); }
@@ -346,6 +353,7 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
       <a href="#status">Badges &amp; status</a>
       <a href="#cards">Cards</a>
       <a href="#listas">Listas</a>
+      <a href="#tabela-crud">Tabela de cadastro</a>
       <a href="#navegacao">Navegação</a>
       <a href="#alertas">Alertas &amp; toasts</a>
       <div class="grp">Padrões do domínio</div>
@@ -611,6 +619,41 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
           <div class="li-value" style="color:var(--danger);">8 un</div>
         </div>
       </div>
+    </section>
+
+    <!-- ================= TABELA DE CRUD ================= -->
+    <section class="section" id="tabela-crud">
+      <h2>Tabela de cadastro</h2>
+      <p class="lede">Toda tela de cadastro do sistema — cardápio, comandas, estoque, módulos — usa esta mesma tabela. As colunas vêm dos campos do recurso, e a última coluna é sempre de ações: editar em secundário, remover em perigo, ambos compactos.</p>
+      <div class="showcase">
+        <div class="showcase-label">Cabeçalho + linhas + ações</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Nome do item</th><th>Categoria</th><th>Preço</th><th class="col-actions">Ações</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Batata frita</td>
+              <td><span class="pill pill-neutral"><span class="dot"></span>Comida</span></td>
+              <td>R$ 28,00</td>
+              <td class="col-actions">
+                <button class="btn btn-secondary btn-compact">Editar</button>
+                <button class="btn btn-danger btn-compact">Remover</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Caipirinha</td>
+              <td><span class="pill pill-neutral"><span class="dot"></span>Bebida</span></td>
+              <td>R$ 22,00</td>
+              <td class="col-actions">
+                <button class="btn btn-secondary btn-compact">Editar</button>
+                <button class="btn btn-danger btn-compact">Remover</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede">Quando o perfil não pode excluir, a coluna de ações traz só "Editar" — o botão não aparece desabilitado, para não sugerir uma ação que nunca vai estar disponível para aquele usuário.</p>
     </section>
 
     <!-- ================= NAVEGAÇÃO ================= -->

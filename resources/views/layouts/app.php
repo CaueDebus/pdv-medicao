@@ -49,7 +49,7 @@ $pageTitle = ($screen['title'] ?? 'ComandaFlex') . ' · ' . ($app['name'] ?? 'Co
             <p><?= htmlspecialchars($screen['lead'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
         </header>
 
-        <?php require __DIR__ . '/../pages/screen.php'; ?>
+        <?php require __DIR__ . '/../' . ($screen['view'] ?? 'pages/screen.php'); ?>
     </main>
 </div>
 <script src="assets/js/app.js"></script>

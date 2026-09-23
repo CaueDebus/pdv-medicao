@@ -16,4 +16,15 @@ return [
         'relatorios' => ['label' => 'Relatórios', 'description' => 'Indicadores e totais'],
         'configuracoes' => ['label' => 'Configurações', 'description' => 'Tema e preferências'],
     ],
+
+    /*
+     * Mapa de variabilidade (LPS): liga cada tela ao código do módulo que a
+     * habilita, na tabela `modules`. Tela sem entrada aqui é núcleo do produto
+     * e está sempre presente. Ver App\Domain\Variability\FeatureToggle.
+     */
+    'features' => [
+        'estoque' => 'stock',
+        'producao' => 'production',
+        'relatorios' => 'reports',
+    ],
 ];

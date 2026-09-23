@@ -45,4 +45,40 @@ final class Session
     {
         return $this->user() !== null;
     }
+
+    /**
+     * Mensagem de uma requisição só: sobrevive ao redirect pós-POST e some na leitura.
+     */
+    public function flash(string $tone, string $message): void
+    {
+        $_SESSION['flash'] = ['tone' => $tone, 'message' => $message];
+    }
+
+    /**
+     * @return array{tone: string, message: string}|null
+     */
+    public function pullFlash(): ?array
+    {
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
+
+        return is_array($flash) ? $flash : null;
+    }
+
+    public function csrfToken(): string
+    {
+        $token = $_SESSION['csrf_token'] ?? null;
+
+        if (! is_string($token) || $token === '') {
+            $token = bin2hex(random_bytes(16));
+            $_SESSION['csrf_token'] = $token;
+        }
+
+        return $token;
+    }
+
+    public function validCsrf(?string $token): bool
+    {
+        return is_string($token) && hash_equals($this->csrfToken(), $token);
+    }
 }

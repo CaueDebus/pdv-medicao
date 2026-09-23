@@ -264,6 +264,189 @@ body::before {
   margin-top: 8px;
 }
 
+/* Componentes de CRUD — derivados de botões, campos, badges e alertas
+   já documentados em ComandaFlex_Design_System.html. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 11px 18px;
+  min-height: 44px;
+  border: 1.5px solid transparent;
+}
+
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: var(--brand-ink); }
+.btn-secondary { background: var(--panel); color: var(--ink); border-color: var(--line-strong); }
+.btn-secondary:hover { background: var(--paper-dim); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #7f271f; }
+.btn-compact { padding: 7px 12px; min-height: 32px; font-size: 0.75rem; }
+
+.alert {
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.8125rem;
+  border-left: 4px solid;
+  margin-bottom: 12px;
+  max-width: 980px;
+}
+
+.alert-info { background: var(--info-soft); border-color: var(--info); color: #1c3f5c; }
+.alert-warn { background: var(--warn-soft); border-color: var(--warn); color: #7a4210; }
+.alert-danger { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+.alert-ok { background: var(--brand-soft); border-color: var(--brand); color: var(--brand-ink); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid transparent;
+}
+
+.pill-ok { background: var(--brand-soft); color: var(--brand-ink); border-color: var(--brand); }
+.pill-info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+.pill-neutral { background: var(--paper-dim); color: var(--ink-soft); border-color: var(--line-strong); }
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.module-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  background: var(--panel);
+  font-size: 0.8125rem;
+}
+
+.module-chip .swdot {
+  width: 34px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  position: relative;
+  flex: none;
+}
+
+.module-chip .swdot.on { background: var(--brand); }
+
+.module-chip .swdot::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+.module-chip .swdot.on::after { left: 17px; }
+
+.crud-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.crud-head h2 { margin: 0; }
+
+.table-wrap { overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.data-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+.col-actions { white-space: nowrap; }
+
+.col-actions .btn { margin-right: 6px; }
+
+.inline-form { display: inline; }
+
+.form-grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.field { margin-bottom: 12px; }
+
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.field input[type="text"],
+.field select {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.field input:focus,
+.field select:focus { border-color: var(--info); outline: none; }
+
+.field-help {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.check-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  text-transform: none;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
