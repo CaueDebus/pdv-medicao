@@ -77,6 +77,8 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 - Proteção CSRF nas escritas e exclusão restrita por perfil.
 - **Variabilidade em tempo de configuração (LPS):** a tabela `modules` define quais telas o produto entrega nesta instalação.
 - Migrações MySQL para usuários, produtos, pedidos, itens, movimentos de estoque e módulos, mais o seed do catálogo de módulos.
+- Indicadores de todas as telas calculados a partir dos dados reais do banco; o fallback de demonstração só entra quando o MySQL está indisponível.
+- Seed opcional de dados operacionais de exemplo (`php scripts/seed_sample_data.php`).
 - Testes de unidade e de feature com runner próprio (`php scripts/test.php`) e classe base `Tests\BaseTest`.
 - Documentação de reúso de software.
 

@@ -15,6 +15,8 @@ O sistema ComandaFlex deve evoluir com o menor acoplamento possível entre camad
 - Prefira mudanças pequenas e localizadas.
 - Mantenha nomes coerentes com o domínio do sistema: comanda, cardápio, estoque, produção, módulos e relatórios.
 - Se houver comportamento de demo, deixe explícito que é fallback e não persistência real.
+- Fallback demo dispara **apenas** com banco indisponível. Consulta que volta vazia com o MySQL no ar é resultado real e deve ser exibida como vazia.
+- Indicador de tela nunca é constante no template: calcule a partir do contexto recebido.
 - Não introduza bibliotecas novas sem necessidade clara.
 
 ## Diretrizes De Arquitetura

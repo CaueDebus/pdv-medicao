@@ -28,13 +28,13 @@ final class OrdersTemplate extends AbstractScreenTemplate
             $this->metric('Comandas abertas', $this->countWhere($orders, 'status', ['open']), 'info'),
             $this->metric('Em preparo', $this->countWhere($orders, 'status', ['preparing']), 'warn'),
             $this->metric('Prontas', $this->countWhere($orders, 'status', ['ready']), 'success'),
-            $this->metric('Valor em aberto', $this->money($this->sumOf($orders, 'total_value')), 'success'),
+            $this->metric('Valor em aberto', $this->money($this->sumOf($this->inProgress($orders), 'total_value')), 'success'),
         ];
     }
 
     protected function highlights(array $context = []): array
     {
-        $orders = $this->rows($context, 'orders');
+        $orders = $this->inProgress($this->rows($context, 'orders'));
 
         if ($orders === []) {
             return [$this->highlight('Nenhuma comanda aberta', 'O salão está sem atendimento em curso neste momento.')];
@@ -57,5 +57,20 @@ final class OrdersTemplate extends AbstractScreenTemplate
             ['title' => 'Comandas em andamento', 'type' => 'orders'],
             ['title' => 'Fechamento e pagamento', 'type' => 'checkout'],
         ];
+    }
+
+    /**
+     * Comandas que ainda representam dinheiro em aberto — fechadas e
+     * canceladas não entram no valor nem nos destaques.
+     *
+     * @param array<int, array<string, mixed>> $orders
+     * @return array<int, array<string, mixed>>
+     */
+    private function inProgress(array $orders): array
+    {
+        return array_values(array_filter(
+            $orders,
+            static fn (array $order): bool => in_array((string) ($order['status'] ?? ''), ['open', 'preparing', 'ready'], true),
+        ));
     }
 }

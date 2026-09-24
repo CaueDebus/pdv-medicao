@@ -18,7 +18,17 @@ Para entender em detalhes o funcionamento interno do runner, veja [sistema-de-mi
 
 ## Passo a passo
 
-1. Configure as variáveis de ambiente do banco, se necessário:
+1. Suba o MySQL/MariaDB e **crie o banco** (ele não é criado pelas migrações):
+
+```bash
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS comandaflex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+No XAMPP, o cliente fica em `C:\xampp\mysql\bin\mysql.exe`. Os padrões do projeto
+(`127.0.0.1:3306`, usuário `root`, senha vazia, banco `comandaflex`) já batem com a
+instalação padrão do XAMPP, então normalmente não é preciso configurar nada.
+
+Se o seu ambiente for diferente, ajuste as variáveis:
 
 ```bash
 set DB_HOST=127.0.0.1
@@ -52,13 +62,24 @@ php scripts/migrate.php down
 php scripts/seed_admin.php
 ```
 
-4. Inicie o servidor local:
+4. Opcional — popule cardápio, comandas e estoque com dados de exemplo, para
+a aplicação já abrir com conteúdo:
+
+```bash
+php scripts/seed_sample_data.php
+```
+
+O script é seguro de repetir: se o cardápio já tiver registros, ele não insere nada.
+Sem ele o sistema funciona normalmente — as telas apenas mostram
+"Nenhum registro cadastrado ainda" até você cadastrar pela interface.
+
+5. Inicie o servidor local:
 
 ```bash
 php -S localhost:8000 -t public
 ```
 
-5. Acesse:
+6. Acesse:
 
 ```text
 http://localhost:8000
@@ -74,6 +95,17 @@ http://localhost:8000
 Se o banco ainda não estiver disponível, a tela de login aceita as mesmas credenciais acima para permitir navegação local imediata.
 
 Nesse modo as telas de CRUD continuam navegáveis, mas exibem o aviso "Modo demonstração" e **não gravam nada**: a listagem mostra dados de exemplo do repositório. Para exercitar criação, edição e exclusão de verdade, rode as migrações com o MySQL no ar.
+
+O fallback demo só entra quando o banco está **indisponível**. Com o MySQL no ar, uma tabela vazia é mostrada como vazia — o sistema nunca troca dado real por dado de exemplo.
+
+### Como saber se está lendo dados reais
+
+- O aviso laranja "Modo demonstração" **não** aparece nas telas de CRUD.
+- Os indicadores de cada tela batem com o banco. Para conferir:
+
+```bash
+mysql -u root comandaflex -e "SELECT status, COUNT(*) FROM orders GROUP BY status;"
+```
 
 ## Telas de CRUD
 

@@ -44,14 +44,15 @@ abstract class AbstractCrudRepository implements CrudRepository
         return Database::instance()->connected();
     }
 
+    /**
+     * Com o banco disponível, o resultado real é sempre devolvido — inclusive
+     * vazio. Tabela sem registro é informação legítima ("nada cadastrado"),
+     * não motivo para exibir dado de demonstração no lugar.
+     */
     final public function all(): array
     {
         if ($this->persists()) {
-            $rows = Database::instance()->fetchAll($this->selectSql() . ' ORDER BY ' . $this->orderBy());
-
-            if ($rows !== []) {
-                return $rows;
-            }
+            return Database::instance()->fetchAll($this->selectSql() . ' ORDER BY ' . $this->orderBy());
         }
 
         return $this->demoRows();

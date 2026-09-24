@@ -8,7 +8,8 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 
 - `reuso-ui-design-system`: sim, a linguagem visual do protótipo foi reaproveitada como referência de cor, contraste, bordas e foco em leitura rápida.
 - `reuso-layout-base`: sim, as telas usam um único layout com navegação lateral compartilhada.
-- `reuso-dados-fallback`: sim, os repositórios retornam dados demo quando o MySQL ainda não estiver disponível.
+- `reuso-dados-fallback`: sim, os repositórios retornam dados demo quando o MySQL ainda não estiver disponível — e **somente** nesse caso. Tabela vazia com banco no ar é exibida como vazia; o fallback nunca mascara dado real.
+- `reuso-indicadores-do-contexto`: sim, os indicadores de cada tela são calculados do contexto recebido, então nenhum número fica escrito no template.
 - `reuso-template-screens`: sim, as telas compartilham templates de montagem para reduzir repetição.
 - `reuso-acesso-por-perfil`: sim, a navegação e o roteamento diferenciam operador, gerente e admin, cada um com sua estratégia.
 - `reuso-crud-generico`: sim, as quatro telas de CRUD compartilham um único controller, uma única listagem e um único formulário; o que muda é a descrição do recurso.
@@ -68,6 +69,19 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 - Uma subclasse concreta por tela: `DashboardTemplate`, `MenuTemplate`, `OrdersTemplate`, `StockTemplate`, `ProductionTemplate`, `ModulesTemplate`, `ReportsTemplate` e `SettingsTemplate`. Cada uma calcula seus indicadores e destaques a partir do contexto recebido, então duas telas nunca mostram o mesmo resumo.
 - Os auxiliares de montagem (`metric`, `highlight`, `rows`, `countWhere`, `sumOf`, `money`) ficam `final` na classe base: o template concreto descreve **o que** mostrar, nunca **como** montar.
 - Decisão registrada: havia um único `OperationsTemplate` atendendo cardápio, comandas, estoque, produção e módulos com números fixos — as cinco telas ficavam idênticas nos painéis de resumo. Ele foi substituído pelas subclasses específicas, e o texto de cada tela passou a viver no seu próprio template (a `ScreenFactory` só escolhe, não descreve mais), eliminando a segunda fonte de verdade.
+
+## Dados reais x fallback demo
+
+Regra: **o fallback demo só existe para banco indisponível.** Com o MySQL no ar, o repositório devolve o resultado da consulta como ele é, inclusive vazio.
+
+O motivo é de leitura: se uma tabela vazia exibisse dados de exemplo, o usuário não teria como distinguir "nada cadastrado" de "três produtos cadastrados", e excluir o último registro faria dados fictícios reaparecerem. Tabela vazia é informação legítima e a listagem de CRUD já tem o estado "Nenhum registro cadastrado ainda".
+
+Consequências registradas:
+
+- `AbstractCrudRepository::all()` e `OrderRepository::openOrders()` não tratam mais lista vazia como motivo de fallback.
+- A fila de produção passou a ser derivada das comandas reais (o status da comanda é o estágio na cozinha/bar) em vez de um array fixo.
+- Nenhum indicador de tela é constante: todos saem do contexto montado pelo `PageController`.
+- Dados operacionais de exemplo, quando desejados, entram por seed explícito (`scripts/seed_sample_data.php`) e não por fallback silencioso.
 - `App\Repositories\AbstractCrudRepository`: segunda aplicação do padrão, agora na persistência. O esqueleto de listar, buscar, gravar e excluir é `final`; cada repositório concreto só informa tabela, colunas, ordenação e dados de demonstração.
 
 ### Factory
