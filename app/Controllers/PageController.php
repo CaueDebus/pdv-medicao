@@ -19,6 +19,7 @@ use App\Repositories\DashboardRepository;
 use App\Repositories\ModuleRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\StockMovementRepository;
 
 final class PageController
 {
@@ -34,6 +35,7 @@ final class PageController
         private readonly OrderRepository $orderRepository = new OrderRepository(),
         private readonly ModuleRepository $moduleRepository = new ModuleRepository(),
         ?FeatureToggle $features = null,
+        private readonly StockMovementRepository $stockMovementRepository = new StockMovementRepository(),
     ) {
         $this->features = $features ?? new FeatureToggle(
             $this->moduleRepository->all(),
@@ -106,6 +108,7 @@ final class PageController
             'low_stock' => $this->productRepository->lowStock(),
             'orders' => $this->orderRepository->openOrders(),
             'queue' => $this->orderRepository->productionQueue(),
+            'movements' => $this->stockMovementRepository->all(),
             'modules' => $this->moduleRepository->all(),
             'features' => $this->features->states(),
             'flash' => Session::instance()->pullFlash(),

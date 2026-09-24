@@ -65,7 +65,9 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 ### Template Method
 
 - `App\Domain\Patterns\Template\AbstractScreenTemplate`: base para montar cada tela com estrutura consistente.
-- `DashboardTemplate`, `OperationsTemplate`, `ReportsTemplate`: exemplos concretos do template method para telas distintas.
+- Uma subclasse concreta por tela: `DashboardTemplate`, `MenuTemplate`, `OrdersTemplate`, `StockTemplate`, `ProductionTemplate`, `ModulesTemplate`, `ReportsTemplate` e `SettingsTemplate`. Cada uma calcula seus indicadores e destaques a partir do contexto recebido, então duas telas nunca mostram o mesmo resumo.
+- Os auxiliares de montagem (`metric`, `highlight`, `rows`, `countWhere`, `sumOf`, `money`) ficam `final` na classe base: o template concreto descreve **o que** mostrar, nunca **como** montar.
+- Decisão registrada: havia um único `OperationsTemplate` atendendo cardápio, comandas, estoque, produção e módulos com números fixos — as cinco telas ficavam idênticas nos painéis de resumo. Ele foi substituído pelas subclasses específicas, e o texto de cada tela passou a viver no seu próprio template (a `ScreenFactory` só escolhe, não descreve mais), eliminando a segunda fonte de verdade.
 - `App\Repositories\AbstractCrudRepository`: segunda aplicação do padrão, agora na persistência. O esqueleto de listar, buscar, gravar e excluir é `final`; cada repositório concreto só informa tabela, colunas, ordenação e dados de demonstração.
 
 ### Factory

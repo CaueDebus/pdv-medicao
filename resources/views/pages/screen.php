@@ -53,6 +53,7 @@ $crud = $screen['context']['crud'] ?? null;
     <?php require __DIR__ . '/../crud/table.php'; ?>
 <?php endif; ?>
 
+<?php if (! is_array($crud)): // nas telas de CRUD a própria tabela já é o bloco de dados ?>
 <section class="panel panel-data">
     <h2>Dados carregados</h2>
     <?php if (($screen['page'] ?? '') === 'dashboard'): ?>
@@ -112,3 +113,4 @@ $crud = $screen['context']['crud'] ?? null;
         </div>
     <?php endif; ?>
 </section>
+<?php endif; ?>

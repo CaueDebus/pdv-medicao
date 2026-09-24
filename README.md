@@ -85,7 +85,7 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 | Padrão | Exemplos codificados |
 | --- | --- |
 | Singleton | `Config`, `Database`, `Session` |
-| Template Method | `AbstractScreenTemplate` (+ `DashboardTemplate`, `OperationsTemplate`, `ReportsTemplate`) e `AbstractCrudRepository` |
+| Template Method | `AbstractScreenTemplate` com 8 telas concretas (`Dashboard`, `Menu`, `Orders`, `Stock`, `Production`, `Modules`, `Reports`, `Settings`) e `AbstractCrudRepository` |
 | Factory | `ScreenFactory` (escolhe o template da tela) e `CrudFactory` (escolhe o recurso CRUD da rota) |
 | Strategy | `OperatorNavigationStrategy`, `ManagerNavigationStrategy`, `AdminNavigationStrategy` |
 | Repository | `Dashboard`, `Product`, `Order`, `StockMovement`, `Module`, `User` |

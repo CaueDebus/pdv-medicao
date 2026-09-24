@@ -4,69 +4,44 @@ declare(strict_types=1);
 
 namespace App\Domain\Patterns\Factory;
 
+use App\Domain\Patterns\Template\AbstractScreenTemplate;
 use App\Domain\Patterns\Template\DashboardTemplate;
-use App\Domain\Patterns\Template\OperationsTemplate;
+use App\Domain\Patterns\Template\MenuTemplate;
+use App\Domain\Patterns\Template\ModulesTemplate;
+use App\Domain\Patterns\Template\OrdersTemplate;
+use App\Domain\Patterns\Template\ProductionTemplate;
 use App\Domain\Patterns\Template\ReportsTemplate;
+use App\Domain\Patterns\Template\SettingsTemplate;
+use App\Domain\Patterns\Template\StockTemplate;
 
+/**
+ * Decide qual Template Method monta a tela pedida.
+ *
+ * Cada rota tem seu próprio template, e o texto e os indicadores de cada
+ * tela vivem no template correspondente — a factory só escolhe, não
+ * descreve. Assim não existe uma segunda fonte de verdade para o conteúdo.
+ */
 final class ScreenFactory
 {
     public function create(string $page, array $context = []): array
     {
-        $template = match ($page) {
-            'dashboard' => new DashboardTemplate(),
-            'cardapio', 'comandas', 'estoque', 'producao', 'modulos' => new OperationsTemplate(),
-            'relatorios', 'configuracoes' => new ReportsTemplate(),
-            default => new DashboardTemplate(),
-        };
-
-        $screen = $template->build($context);
+        $screen = $this->templateFor($page)->build($context);
         $screen['page'] = $page;
-        $screen['title'] = $this->titleFor($page, $screen['title'] ?? $page);
-        $screen['subtitle'] = $this->subtitleFor($page, $screen['subtitle'] ?? '');
-        $screen['lead'] = $this->leadFor($page, $screen['lead'] ?? '');
 
         return $screen;
     }
 
-    private function titleFor(string $page, string $fallback): string
+    private function templateFor(string $page): AbstractScreenTemplate
     {
         return match ($page) {
-            'cardapio' => 'Cardápio',
-            'comandas' => 'Comandas',
-            'estoque' => 'Estoque',
-            'producao' => 'Produção',
-            'modulos' => 'Módulos',
-            'relatorios' => 'Relatórios',
-            'configuracoes' => 'Configurações',
-            default => $fallback,
-        };
-    }
-
-    private function subtitleFor(string $page, string $fallback): string
-    {
-        return match ($page) {
-            'cardapio' => 'Catálogo e preços do menu',
-            'comandas' => 'Abertura, acompanhamento e fechamento',
-            'estoque' => 'Disponibilidade e alertas operacionais',
-            'producao' => 'Fila de cozinha e bar',
-            'modulos' => 'Recursos ativos do sistema',
-            'relatorios' => 'Indicadores operacionais e gerenciais',
-            'configuracoes' => 'Preferências do ambiente',
-            default => $fallback,
-        };
-    }
-
-    private function leadFor(string $page, string $fallback): string
-    {
-        return match ($page) {
-            'cardapio' => 'Lista de produtos pronta para virar CRUD, com navegação central compartilhada.',
-            'comandas' => 'Fluxo de atendimento pensado para balcão e mesa, sem quebrar o padrão do layout.',
-            'estoque' => 'Leitura rápida do que ainda pode ser vendido e do que precisa reposição.',
-            'producao' => 'Visão da fila de preparo com estados legíveis para cozinha e bar.',
-            'modulos' => 'Mapa dos módulos do produto e das integrações em expansão.',
-            'relatorios' => 'Resumo para tomada de decisão sem obrigar o usuário a sair da navegação principal.',
-            'configuracoes' => 'Ponto de entrada para tema, permissões e parâmetros do sistema.',
-            default => $fallback,
+            'cardapio' => new MenuTemplate(),
+            'comandas' => new OrdersTemplate(),
+            'estoque' => new StockTemplate(),
+            'producao' => new ProductionTemplate(),
+            'modulos' => new ModulesTemplate(),
+            'relatorios' => new ReportsTemplate(),
+            'configuracoes' => new SettingsTemplate(),
+            default => new DashboardTemplate(),
         };
     }
 }
