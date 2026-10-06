@@ -118,16 +118,22 @@ Quatro telas fazem CRUD completo sobre o MySQL, todas servidas pelo mesmo contro
 | Estoque | `stock_movements` | lista com JOIN em `products` |
 | Módulos | `modules` | é o painel de variabilidade do produto |
 
-Exclusão é restrita: cardápio, comandas e estoque exigem perfil `manager` ou `admin`; módulos exigem `admin`.
+Permissões: cardápio, comandas e estoque podem ser editados por qualquer perfil autenticado, e a exclusão exige `manager` ou `admin`. A tela de Módulos é inteira restrita ao `admin` — para os outros perfis ela é somente leitura.
+
+Campos de liga/desliga (como o `enabled` dos módulos) são alternáveis em um clique direto na listagem, sem abrir o formulário.
 
 ## Ligar e desligar módulos (variabilidade)
 
 A migration `007_seed_modules.sql` popula o catálogo de módulos. Para ver a variabilidade funcionando:
 
 1. Entre como `admin` e abra a tela **Módulos**.
-2. Edite o "Módulo Estoque" e desmarque "Ativo nesta instalação".
+2. **Clique no chip** verde do "Módulo Estoque" (o próprio chip é o interruptor).
 3. A tela de Estoque some da navegação e a rota passa a cair no dashboard.
-4. Reative o módulo para trazer a tela de volta.
+4. Clique no chip de novo para trazer a tela de volta.
+
+Também é possível alternar pelo formulário (**Editar** → "Ativo nesta instalação"), mas o clique no chip é o caminho de um passo.
+
+Alterar o catálogo de módulos é **restrito ao perfil `admin`**: operador e gerente veem a tela de Módulos como somente leitura, já que ligar ou desligar um módulo muda o produto entregue.
 
 A tela de Configurações lista quais módulos estão ligados nesta instalação.
 

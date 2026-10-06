@@ -31,7 +31,7 @@ final class CrudController
     {
         $resource = $this->resourceFor($page, $user);
 
-        if (! $resource instanceof CrudResource) {
+        if (! $resource instanceof CrudResource || ! $resource->canWrite($this->roleOf($user))) {
             return $this->pageController->render($page, $user);
         }
 
@@ -60,6 +60,12 @@ final class CrudController
             return '?page=' . urlencode($page);
         }
 
+        if (! $resource->canWrite($this->roleOf($user))) {
+            $session->flash('danger', 'Seu perfil não pode alterar ' . $resource->singular . '.');
+
+            return '?page=' . urlencode($page);
+        }
+
         $validation = $resource->validate($input);
 
         if ($validation['errors'] !== []) {
@@ -83,6 +89,67 @@ final class CrudController
         $session->flash('ok', $resource->savedMessage($id === null));
 
         return '?page=' . urlencode($page);
+    }
+
+    /**
+     * Alterna um campo booleano direto da listagem, em um clique.
+     *
+     * É o que faz o painel de módulos funcionar como painel de variabilidade:
+     * ligar e desligar um módulo não deveria exigir abrir o formulário.
+     *
+     * @param array<string, mixed> $input
+     */
+    public function toggle(string $page, ?array $user, array $input, int $id): string
+    {
+        $session = Session::instance();
+        $resource = $this->resourceFor($page, $user);
+        $redirect = '?page=' . urlencode($page);
+
+        if (! $resource instanceof CrudResource) {
+            return $redirect;
+        }
+
+        if (! $session->validCsrf(isset($input['_token']) ? (string) $input['_token'] : null)) {
+            $session->flash('danger', 'Sessão expirada. Tente novamente.');
+
+            return $redirect;
+        }
+
+        if (! $resource->canWrite($this->roleOf($user))) {
+            $session->flash('danger', 'Seu perfil não pode alterar ' . $resource->singular . '.');
+
+            return $redirect;
+        }
+
+        // O nome do campo vem do formulário, então só vale se estiver
+        // declarado no recurso e for mesmo um campo de liga/desliga.
+        $field = $resource->field(isset($input['field']) ? (string) $input['field'] : '');
+
+        if ($field === null || $field->type !== 'toggle') {
+            return $redirect;
+        }
+
+        $record = $resource->repository->find($id);
+
+        if ($record === null) {
+            $session->flash('warn', 'Registro não encontrado.');
+
+            return $redirect;
+        }
+
+        $enabled = ! (bool) ($record[$field->name] ?? false);
+
+        if (! $resource->repository->update($id, [$field->name => $enabled ? 1 : 0])) {
+            $session->flash('warn', $resource->repository->persists()
+                ? 'Não foi possível alterar o registro.'
+                : 'Modo demonstração: o MySQL não está disponível, então nada foi gravado.');
+
+            return $redirect;
+        }
+
+        $session->flash('ok', $resource->toggledMessage($enabled));
+
+        return $redirect;
     }
 
     public function destroy(string $page, ?array $user, array $input, int $id): string

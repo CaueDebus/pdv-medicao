@@ -186,6 +186,120 @@ final class CrudScreensTest extends BaseTest
         $this->assertStringContainsString('Modo demonstração', $flash['message']);
     }
 
+    public function testModulesListRendersAnInlineToggleForAdmin(): void
+    {
+        // Arrange
+        $controller = new PageController();
+
+        // Act
+        $html = $controller->render('modulos', $this->user('admin'));
+
+        // Assert
+        $this->assertStringContainsString('action=toggle', $html);
+        $this->assertStringContainsString('name="field" value="enabled"', $html);
+        $this->assertStringContainsString('module-chip-button', $html);
+    }
+
+    public function testOperatorSeesModulesAsReadOnly(): void
+    {
+        // Arrange
+        $controller = new PageController();
+
+        // Act
+        $html = $controller->render('modulos', $this->user('operator'));
+
+        // Assert
+        $this->assertStringContainsString('somente leitura', $html);
+        $this->assertStringNotContainsString('action=toggle', $html);
+        $this->assertStringNotContainsString('action=create', $html);
+    }
+
+    public function testOperatorCannotToggleModulesEvenPostingDirectly(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $controller->toggle('modulos', $this->user('operator'), ['_token' => $token, 'field' => 'enabled'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertSame('danger', $flash['tone']);
+        $this->assertStringContainsString('não pode alterar', $flash['message']);
+    }
+
+    public function testToggleRejectsAFieldThatIsNotAToggle(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act — "name" existe no recurso, mas é texto, não liga/desliga
+        $redirect = $controller->toggle('modulos', $this->user('admin'), ['_token' => $token, 'field' => 'name'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertSame('?page=modulos', $redirect);
+        $this->assertNull($flash, 'campo inválido não gera gravação nem mensagem de sucesso');
+    }
+
+    public function testToggleRejectsAFieldOutsideTheResource(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $controller->toggle('modulos', $this->user('admin'), ['_token' => $token, 'field' => 'id'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertNull($flash);
+    }
+
+    public function testToggleWithoutCsrfIsRejected(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+
+        // Act
+        $controller->toggle('modulos', $this->user('admin'), ['field' => 'enabled'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertSame('danger', $flash['tone']);
+        $this->assertStringContainsString('Sessão expirada', $flash['message']);
+    }
+
+    public function testAdminToggleReachesPersistenceLayer(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $controller->toggle('modulos', $this->user('admin'), ['_token' => $token, 'field' => 'enabled'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert — passa das permissões e só para no modo demo
+        $this->assertSame('warn', $flash['tone']);
+        $this->assertStringContainsString('Modo demonstração', $flash['message']);
+    }
+
+    public function testOperatorCannotOpenTheModulesForm(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+
+        // Act
+        $html = $controller->form('modulos', $this->user('operator'));
+
+        // Assert — cai na listagem, sem formulário
+        $this->assertStringNotContainsString('action=store', $html);
+        $this->assertStringContainsString('somente leitura', $html);
+    }
+
     public function testDemoModeBannerIsVisibleOnCrudScreens(): void
     {
         // Arrange

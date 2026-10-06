@@ -122,7 +122,8 @@ final class PageController
                 'resource' => $resource,
                 'rows' => $resource->repository->all(),
                 'persists' => $resource->repository->persists(),
-                'can_destroy' => $resource->canDestroy($role),
+                'can_write' => $resource->canWrite($role),
+                'can_destroy' => $resource->canDestroy($role) && $resource->canWrite($role),
                 'token' => Session::instance()->csrfToken(),
                 'page' => $page,
             ];

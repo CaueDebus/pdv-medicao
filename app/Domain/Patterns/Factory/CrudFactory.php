@@ -106,6 +106,9 @@ final class CrudFactory
             ],
             feminine: false,
             destroyRoles: ['admin'],
+            // Alterar o catálogo de módulos muda o produto entregue:
+            // é decisão de administração, não de operação.
+            writeRoles: ['admin'],
         );
     }
 

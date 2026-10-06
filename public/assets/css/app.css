@@ -354,6 +354,29 @@ body::before {
 
 .module-chip .swdot.on::after { left: 17px; }
 
+/* Chip de módulo como controle: um clique liga/desliga o ponto de variação. */
+.module-chip-button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.module-chip-button:hover {
+  background: var(--paper-dim);
+  border-color: var(--line-strong);
+}
+
+.module-chip-button:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}
+
+.muted-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .crud-head {
   display: flex;
   align-items: center;

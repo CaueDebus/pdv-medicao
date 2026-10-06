@@ -127,6 +127,10 @@ Dois níveis de variabilidade são exercitados:
 
 A tela de Módulos é o próprio painel de configuração do produto: é um CRUD como os outros, e o que ele edita é a composição da instalação.
 
+O chip de módulo documentado no protótipo virou controle de verdade: clicar nele alterna o ponto de variação em um passo (`action=toggle`), sem abrir formulário. A ação é genérica — vale para qualquer campo do tipo `toggle` de qualquer recurso — e só aceita nome de campo declarado no `CrudResource` e do tipo correto, então o nome que vem do formulário nunca chega cru ao banco.
+
+Permissão de escrita entrou no `CrudResource` (`writeRoles`): o catálogo de módulos é restrito ao `admin`, porque ligar e desligar módulo muda o produto entregue — não é decisão de operação. Para os demais perfis a tela fica somente leitura.
+
 ### Base de testes (Template Method + reúso de asserções)
 
 - `Tests\BaseTest`: concentra as asserções e o ciclo `setUp`/`run`/`tearDown`. Cada classe de teste só descreve os casos, no padrão Arrange/Act/Assert.

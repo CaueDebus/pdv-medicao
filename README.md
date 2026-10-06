@@ -74,7 +74,8 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 - Autenticação por sessão com login e logout.
 - Perfis `operator`, `manager` e `admin` com visibilidade de navegação e roteamento por role.
 - **CRUD completo persistindo no MySQL** em quatro telas: cardápio (`products`), comandas (`orders`), estoque (`stock_movements`) e módulos (`modules`).
-- Proteção CSRF nas escritas e exclusão restrita por perfil.
+- Proteção CSRF nas escritas, permissão de escrita e de exclusão por perfil.
+- Pontos de variação alternáveis em um clique na própria listagem de módulos (restrito ao `admin`).
 - **Variabilidade em tempo de configuração (LPS):** a tabela `modules` define quais telas o produto entrega nesta instalação.
 - Migrações MySQL para usuários, produtos, pedidos, itens, movimentos de estoque e módulos, mais o seed do catálogo de módulos.
 - Indicadores de todas as telas calculados a partir dos dados reais do banco; o fallback de demonstração só entra quando o MySQL está indisponível.

@@ -26,7 +26,22 @@ final class CrudResource
         public readonly array $fields,
         public readonly bool $feminine = true,
         public readonly array $destroyRoles = ['manager', 'admin'],
+        public readonly array $writeRoles = ['operator', 'manager', 'admin'],
     ) {
+    }
+
+    public function canWrite(string $role): bool
+    {
+        return in_array($role, $this->writeRoles, true);
+    }
+
+    public function toggledMessage(bool $on): string
+    {
+        $verb = $on
+            ? ($this->feminine ? 'ativada' : 'ativado')
+            : ($this->feminine ? 'desativada' : 'desativado');
+
+        return ucfirst($this->singular) . ' ' . $verb . '.';
     }
 
     public function newLabel(): string

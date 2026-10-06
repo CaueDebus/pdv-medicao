@@ -51,7 +51,7 @@ if (! $session->isAuthenticated()) {
 $user = $session->user();
 $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
 
-if (in_array($action, ['create', 'edit', 'store', 'update', 'destroy'], true)) {
+if (in_array($action, ['create', 'edit', 'store', 'update', 'destroy', 'toggle'], true)) {
 	$crud = new CrudController();
 
 	if ($action === 'create') {
@@ -64,7 +64,7 @@ if (in_array($action, ['create', 'edit', 'store', 'update', 'destroy'], true)) {
 		exit;
 	}
 
-	if ($isPost && $id === null && in_array($action, ['update', 'destroy'], true)) {
+	if ($isPost && $id === null && in_array($action, ['update', 'destroy', 'toggle'], true)) {
 		header('Location: ?page=' . urlencode($page));
 		exit;
 	}
@@ -74,6 +74,7 @@ if (in_array($action, ['create', 'edit', 'store', 'update', 'destroy'], true)) {
 			'store' => $crud->save($page, $user, $_POST),
 			'update' => $crud->save($page, $user, $_POST, $id),
 			'destroy' => $crud->destroy($page, $user, $_POST, (int) $id),
+			'toggle' => $crud->toggle($page, $user, $_POST, (int) $id),
 			default => '?page=' . urlencode($page),
 		};
 
