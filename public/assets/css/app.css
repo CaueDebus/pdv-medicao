@@ -372,6 +372,22 @@ body::before {
   outline-offset: 2px;
 }
 
+.module-chip-button.is-busy {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .module-chip .swdot,
+  .module-chip .swdot::after {
+    transition: background .15s ease, left .15s ease;
+  }
+
+  .module-chip-button {
+    transition: opacity .15s ease, background .15s ease, border-color .15s ease;
+  }
+}
+
 .muted-note {
   font-size: 0.75rem;
   color: var(--muted);

@@ -54,7 +54,7 @@ $token = (string) ($crud['token'] ?? '');
                             <td>
                                 <?php $raw = $row[$field->name] ?? ''; ?>
                                 <?php if ($field->type === 'toggle' && ! empty($crud['can_write'])): ?>
-                                    <form class="inline-form" method="post" action="?page=<?= urlencode($page) ?>&amp;action=toggle&amp;id=<?= (int) ($row['id'] ?? 0) ?>">
+                                    <form class="inline-form" method="post" data-inline-toggle action="?page=<?= urlencode($page) ?>&amp;action=toggle&amp;id=<?= (int) ($row['id'] ?? 0) ?>">
                                         <input type="hidden" name="_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="field" value="<?= htmlspecialchars($field->name, ENT_QUOTES, 'UTF-8') ?>">
                                         <button

@@ -129,6 +129,8 @@ A tela de Módulos é o próprio painel de configuração do produto: é um CRUD
 
 O chip de módulo documentado no protótipo virou controle de verdade: clicar nele alterna o ponto de variação em um passo (`action=toggle`), sem abrir formulário. A ação é genérica — vale para qualquer campo do tipo `toggle` de qualquer recurso — e só aceita nome de campo declarado no `CrudResource` e do tipo correto, então o nome que vem do formulário nunca chega cru ao banco.
 
+O clique não recarrega a tela, e isso foi feito **sem duplicar a regra no navegador**: o `public/assets/js/app.js` envia o mesmo POST do formulário, o `fetch` segue o redirect de sempre e a resposta já é a tela renderizada pelo PHP. O JavaScript apenas troca as regiões que mudaram (`.nav-list` e `.content-area`), então menu, indicadores, listagem e mensagem ficam consistentes com uma única fonte de verdade — a aplicação. É melhoria progressiva: sem JavaScript, ou se o `fetch` falhar, o formulário segue o caminho normal com recarregamento.
+
 Permissão de escrita entrou no `CrudResource` (`writeRoles`): o catálogo de módulos é restrito ao `admin`, porque ligar e desligar módulo muda o produto entregue — não é decisão de operação. Para os demais perfis a tela fica somente leitura.
 
 ### Base de testes (Template Method + reúso de asserções)

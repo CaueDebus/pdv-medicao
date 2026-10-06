@@ -128,8 +128,10 @@ A migration `007_seed_modules.sql` popula o catálogo de módulos. Para ver a va
 
 1. Entre como `admin` e abra a tela **Módulos**.
 2. **Clique no chip** verde do "Módulo Estoque" (o próprio chip é o interruptor).
-3. A tela de Estoque some da navegação e a rota passa a cair no dashboard.
+3. Sem recarregar a página, o chip apaga e a tela de Estoque some do menu lateral. A rota passa a cair no dashboard.
 4. Clique no chip de novo para trazer a tela de volta.
+
+É o melhor momento para demonstrar a variabilidade: dá para ver o menu mudar ao vivo, sem sair da tela.
 
 Também é possível alternar pelo formulário (**Editar** → "Ativo nesta instalação"), mas o clique no chip é o caminho de um passo.
 
