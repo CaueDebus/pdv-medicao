@@ -131,6 +131,12 @@ O chip de módulo documentado no protótipo virou controle de verdade: clicar ne
 
 O clique não recarrega a tela, e isso foi feito **sem duplicar a regra no navegador**: o `public/assets/js/app.js` envia o mesmo POST do formulário, o `fetch` segue o redirect de sempre e a resposta já é a tela renderizada pelo PHP. O JavaScript apenas troca as regiões que mudaram (`.nav-list` e `.content-area`), então menu, indicadores, listagem e mensagem ficam consistentes com uma única fonte de verdade — a aplicação. É melhoria progressiva: sem JavaScript, ou se o `fetch` falhar, o formulário segue o caminho normal com recarregamento.
 
+### Confirmação em toast
+
+A mensagem de confirmação continua sendo renderizada pelo PHP como aviso no topo da tela, marcada com `data-flash`. Havendo JavaScript, ela é **promovida a toast** (componente do protótipo) e sai do fluxo do documento; sem JavaScript, segue sendo o aviso no topo. A mensagem nunca é escrita no JavaScript: ela tem uma origem só, o `Session::flash()`.
+
+Isso vale para todas as ações de CRUD — cadastrar, editar, excluir e alternar — porque a promoção acontece em cima do bloco de flash, não de uma ação específica.
+
 Permissão de escrita entrou no `CrudResource` (`writeRoles`): o catálogo de módulos é restrito ao `admin`, porque ligar e desligar módulo muda o produto entregue — não é decisão de operação. Para os demais perfis a tela fica somente leitura.
 
 ### Base de testes (Template Method + reúso de asserções)

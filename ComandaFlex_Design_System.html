@@ -288,11 +288,18 @@ main{ flex:1; min-width:0; }
 .alert-ok{ background:var(--brand-soft); border-color:var(--brand); color:var(--brand-ink); }
 
 .toast{
-  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(140%);
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(160%);
+  display:flex; align-items:center; gap:10px;
   background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-pill);
   font-size:var(--text-sm); transition:transform .25s ease; z-index:50;
+  box-shadow:0 10px 30px rgba(27,24,18,.28);
 }
-.toast.show{ transform:translateX(-50%) translateY(0); }
+.toast.is-visible{ transform:translateX(-50%) translateY(0); }
+.toast-dot{ width:8px; height:8px; flex:none; border-radius:50%; background:var(--brand-soft); }
+.toast.tone-ok .toast-dot{ background:#6FCF97; }
+.toast.tone-info .toast-dot{ background:#7FB3DD; }
+.toast.tone-warn .toast-dot{ background:#E9A862; }
+.toast.tone-danger .toast-dot{ background:#E98B80; }
 
 /* stock bar */
 .stockbar-wrap{ width:260px; }
@@ -677,7 +684,13 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
       <div class="alert alert-info">3 pedidos aguardando na cozinha.</div>
       <div class="alert alert-warn">Limão abaixo do estoque mínimo.</div>
       <div class="alert alert-danger">Estoque insuficiente para concluir a venda.</div>
-      <button class="btn btn-secondary" style="margin-top:var(--space-3);" onclick="showToast()">Disparar um toast</button>
+      <p class="lede">O toast confirma o que acabou de acontecer e sai sozinho, sem empurrar o conteúdo da tela. Ele carrega ponto de cor <em>e</em> texto — a cor sozinha nunca conta a história. Aviso e erro ficam mais tempo na tela, porque costumam pedir uma ação de quem lê.</p>
+      <div class="showcase-row" style="margin-top:var(--space-3);">
+        <button class="btn btn-secondary" onclick="showToast('ok')">Toast de confirmação</button>
+        <button class="btn btn-secondary" onclick="showToast('info')">Toast informativo</button>
+        <button class="btn btn-secondary" onclick="showToast('warn')">Toast de aviso</button>
+        <button class="btn btn-secondary" onclick="showToast('danger')">Toast de erro</button>
+      </div>
     </section>
 
     <!-- ================= ESTOQUE ================= -->
@@ -753,7 +766,7 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
   </main>
 </div>
 
-<div class="toast" id="toast">Pagamento confirmado — comanda encerrada</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-dot"></span><span class="toast-text">Pagamento confirmado — comanda encerrada</span></div>
 
 <script>
 // ---- live reskin demo ----
@@ -793,11 +806,13 @@ document.querySelectorAll('.module-chip .swdot').forEach(dot=>{
 });
 
 // ---- toast demo ----
-function showToast(){
+function showToast(tone){
   const t = document.getElementById('toast');
-  t.classList.add('show');
+  t.classList.remove('tone-ok','tone-info','tone-warn','tone-danger');
+  t.classList.add('tone-' + (tone || 'ok'), 'is-visible');
   clearTimeout(window.__t);
-  window.__t = setTimeout(()=> t.classList.remove('show'), 2200);
+  // Erro e aviso ficam mais tempo: pedem uma ação de quem lê.
+  window.__t = setTimeout(()=> t.classList.remove('is-visible'), (tone === 'warn' || tone === 'danger') ? 4200 : 2600);
 }
 </script>
 

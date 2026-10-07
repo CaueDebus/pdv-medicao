@@ -34,6 +34,52 @@ const swapRegion = (nextDocument, selector) => {
   }
 };
 
+let toastTimer = null;
+
+const showToast = (message, tone) => {
+  const toast = document.getElementById('toast');
+  const text = toast?.querySelector('.toast-text');
+
+  if (!toast || !text) {
+    return;
+  }
+
+  text.textContent = message;
+  toast.classList.remove('tone-ok', 'tone-info', 'tone-warn', 'tone-danger');
+  toast.classList.add(`tone-${tone}`, 'is-visible');
+
+  window.clearTimeout(toastTimer);
+  // Mensagem de erro fica mais tempo: ela costuma pedir uma ação de quem lê.
+  toastTimer = window.setTimeout(
+    () => toast.classList.remove('is-visible'),
+    tone === 'danger' || tone === 'warn' ? 4200 : 2600,
+  );
+};
+
+/*
+ * O servidor sempre renderiza a confirmação como aviso no topo da tela, que é
+ * o que vale sem JavaScript. Havendo JavaScript, ela sobe como toast e sai da
+ * tela — a mensagem continua tendo uma origem só, o PHP.
+ */
+const promoteFlashToToast = (root = document) => {
+  const flash = root.querySelector('.alert[data-flash]');
+
+  if (!flash) {
+    return;
+  }
+
+  const message = flash.textContent.trim();
+  const tone = flash.dataset.flash || 'info';
+
+  flash.remove();
+
+  if (message !== '') {
+    showToast(message, tone);
+  }
+};
+
+promoteFlashToToast();
+
 /*
  * Liga/desliga de ponto de variação sem recarregar a tela.
  *
@@ -86,4 +132,7 @@ document.addEventListener('submit', async (event) => {
 
   swapRegion(nextDocument, '.nav-list');
   swapRegion(nextDocument, '.content-area');
+
+  // A confirmação veio dentro do HTML trocado: tira do topo e sobe como toast.
+  promoteFlashToToast();
 });

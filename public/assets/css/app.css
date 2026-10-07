@@ -393,6 +393,50 @@ body::before {
   color: var(--muted);
 }
 
+/* Toast — componente do protótipo. Confirma uma ação e sai sozinho.
+   Segue a regra do design system: ponto de cor acompanhado de texto,
+   nunca cor isolada. */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(160%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8125rem;
+  box-shadow: 0 10px 30px rgba(27, 24, 18, 0.28);
+  z-index: 50;
+}
+
+.toast.is-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--brand-soft);
+}
+
+.toast.tone-ok .toast-dot { background: #6fcf97; }
+.toast.tone-info .toast-dot { background: #7fb3dd; }
+.toast.tone-warn .toast-dot { background: #e9a862; }
+.toast.tone-danger .toast-dot { background: #e98b80; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    transition: transform .25s ease;
+  }
+}
+
 .crud-head {
   display: flex;
   align-items: center;

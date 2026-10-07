@@ -52,6 +52,12 @@ $pageTitle = ($screen['title'] ?? 'ComandaFlex') . ' · ' . ($app['name'] ?? 'Co
         <?php require __DIR__ . '/../' . ($screen['view'] ?? 'pages/screen.php'); ?>
     </main>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-dot"></span>
+    <span class="toast-text"></span>
+</div>
+
 <script src="assets/js/app.js"></script>
 </body>
 </html>
