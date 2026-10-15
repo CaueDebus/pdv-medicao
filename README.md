@@ -69,15 +69,16 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 
 ## Funcionalidades implementadas
 
-- Navegação entre as telas principais: dashboard, cardápio, comandas, estoque, produção, módulos, relatórios e configurações.
+- Navegação entre as telas principais: dashboard, cardápio, comandas, itens da comanda, mesas, clientes, estoque, fornecedores, produção, estações, pagamentos, módulos, relatórios e configurações.
 - Layout único compartilhado entre todas as páginas.
 - Autenticação por sessão com login e logout.
 - Perfis `operator`, `manager` e `admin` com visibilidade de navegação e roteamento por role.
-- **CRUD completo persistindo no MySQL** em quatro telas: cardápio (`products`), comandas (`orders`), estoque (`stock_movements`) e módulos (`modules`).
+- **CRUD completo persistindo no MySQL** em dez telas (duas por integrante da equipe): cardápio (`products`), comandas (`orders`), itens da comanda (`order_items`), mesas (`dining_tables`), clientes (`customers`), estoque (`stock_movements`), fornecedores (`suppliers`), estações (`production_stations`), pagamentos (`payment_methods`) e módulos (`modules`). Todas usam o mesmo controller e as mesmas duas views.
+- Total da comanda calculado pela soma dos itens lançados: cada item tem o subtotal calculado na gravação, e lançar, editar, trocar de comanda ou excluir um item recalcula o total das comandas afetadas. No formulário da comanda o total é só leitura.
 - Proteção CSRF nas escritas, permissão de escrita e de exclusão por perfil.
 - Pontos de variação alternáveis em um clique na própria listagem de módulos (restrito ao `admin`).
 - **Variabilidade em tempo de configuração (LPS):** a tabela `modules` define quais telas o produto entrega nesta instalação.
-- Migrações MySQL para usuários, produtos, pedidos, itens, movimentos de estoque e módulos, mais o seed do catálogo de módulos.
+- Migrações MySQL para usuários, produtos, pedidos, itens, movimentos de estoque, módulos, mesas, clientes, fornecedores, formas de pagamento e estações de produção, mais o seed do catálogo de módulos.
 - Indicadores de todas as telas calculados a partir dos dados reais do banco; o fallback de demonstração só entra quando o MySQL está indisponível.
 - Seed opcional de dados operacionais de exemplo (`php scripts/seed_sample_data.php`).
 - Testes de unidade e de feature com runner próprio (`php scripts/test.php`) e classe base `Tests\BaseTest`.
@@ -88,16 +89,15 @@ Se o MySQL ainda não estiver disponível, a tela de login aceita essas mesmas c
 | Padrão | Exemplos codificados |
 | --- | --- |
 | Singleton | `Config`, `Database`, `Session` |
-| Template Method | `AbstractScreenTemplate` com 8 telas concretas (`Dashboard`, `Menu`, `Orders`, `Stock`, `Production`, `Modules`, `Reports`, `Settings`) e `AbstractCrudRepository` |
+| Template Method | `AbstractScreenTemplate` com 14 telas concretas (`Dashboard`, `Menu`, `Orders`, `OrderItems`, `DiningTables`, `Customers`, `Stock`, `Suppliers`, `Production`, `ProductionStations`, `PaymentMethods`, `Modules`, `Reports`, `Settings`), `AbstractCrudRepository` (10 repositórios) e `Tests\BaseTest` |
 | Factory | `ScreenFactory` (escolhe o template da tela) e `CrudFactory` (escolhe o recurso CRUD da rota) |
 | Strategy | `OperatorNavigationStrategy`, `ManagerNavigationStrategy`, `AdminNavigationStrategy` |
-| Repository | `Dashboard`, `Product`, `Order`, `StockMovement`, `Module`, `User` |
+| Repository | `Dashboard`, `Product`, `Order`, `OrderItem`, `DiningTable`, `Customer`, `StockMovement`, `Supplier`, `ProductionStation`, `PaymentMethod`, `Module`, `User` |
 
 Detalhes e justificativas em [docs/reuso-de-software.md](docs/reuso-de-software.md).
 
 ## O que ainda não foi implementado
 
-- Itens da comanda (`order_items`) ainda não têm tela própria.
 - Pagamento e fechamento financeiro da comanda.
 - Painel administrativo com edição de permissões.
 - Integração com impressão, NFC-e ou APIs externas.
@@ -106,7 +106,6 @@ Detalhes e justificativas em [docs/reuso-de-software.md](docs/reuso-de-software.
 
 ## Próximos passos sugeridos
 
-1. Criar a tela de itens da comanda reaproveitando a `CrudFactory`.
-2. Implementar o fluxo de pagamento e o fechamento da comanda.
-3. Adicionar testes de integração com MySQL real.
-4. Separar a camada de domínio em entidades e casos de uso conforme o sistema crescer.
+1. Implementar o fluxo de pagamento e o fechamento da comanda, usando as formas de pagamento cadastradas.
+2. Adicionar testes de integração com MySQL real.
+3. Separar a camada de domínio em entidades e casos de uso conforme o sistema crescer.

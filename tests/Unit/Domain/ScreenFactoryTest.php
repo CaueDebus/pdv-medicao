@@ -52,6 +52,27 @@ final class ScreenFactoryTest extends BaseTest
         $this->assertCount(3, $screen['metrics']);
     }
 
+    public function testEachNewCrudScreenGetsItsOwnTemplate(): void
+    {
+        // Arrange
+        $factory = new ScreenFactory();
+        $expected = [
+            'itens' => 'Itens da comanda',
+            'mesas' => 'Mesas',
+            'clientes' => 'Clientes',
+            'fornecedores' => 'Fornecedores',
+            'estacoes' => 'Estações',
+            'pagamentos' => 'Pagamentos',
+        ];
+
+        // Act / Assert — nenhuma cai no fallback do dashboard
+        foreach ($expected as $page => $title) {
+            $screen = $factory->create($page);
+            $this->assertSame($page, $screen['route']);
+            $this->assertSame($title, $screen['title']);
+        }
+    }
+
     public function testCreateUnknownPageFallsBackToDashboardTemplate(): void
     {
         // Arrange

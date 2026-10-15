@@ -146,10 +146,17 @@ final class PageController
      */
     private function allowedPagesForRole(string $role): array
     {
+        // Telas da operação: todo perfil abre. O que cada um pode alterar
+        // dentro delas é decidido pelo writeRoles do CrudResource.
+        $operation = [
+            'dashboard', 'cardapio', 'comandas', 'itens', 'mesas', 'clientes',
+            'estoque', 'fornecedores', 'producao', 'estacoes', 'pagamentos', 'modulos',
+        ];
+
         $pages = match ($role) {
-            'admin' => ['dashboard', 'cardapio', 'comandas', 'estoque', 'producao', 'modulos', 'relatorios', 'configuracoes'],
-            'manager' => ['dashboard', 'cardapio', 'comandas', 'estoque', 'producao', 'modulos', 'relatorios'],
-            default => ['dashboard', 'cardapio', 'comandas', 'estoque', 'producao', 'modulos'],
+            'admin' => [...$operation, 'relatorios', 'configuracoes'],
+            'manager' => [...$operation, 'relatorios'],
+            default => $operation,
         };
 
         return $this->features->filterPages($pages);

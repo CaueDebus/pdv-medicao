@@ -58,6 +58,7 @@ body::before {
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
   padding: 28px 18px;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px);
@@ -507,6 +508,13 @@ body::before {
 
 .field input:focus,
 .field select:focus { border-color: var(--info); outline: none; }
+
+/* Campo calculado pelo sistema: legível, mas visivelmente fora da digitação. */
+.field input[readonly] {
+  background: var(--paper-dim);
+  color: var(--ink-soft);
+  border-style: dashed;
+}
 
 .field-help {
   display: block;

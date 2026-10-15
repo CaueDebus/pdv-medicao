@@ -106,4 +106,40 @@ final class CrudResourceTest extends BaseTest
         $this->assertSame(1, $on['data']['enabled']);
         $this->assertSame(0, $off['data']['enabled']);
     }
+
+    public function testComputedFieldIsNeverTakenFromTheInput(): void
+    {
+        // Arrange
+        $resource = (new CrudFactory())->create('comandas');
+
+        // Act — alguém tenta postar o total na mão
+        $result = $resource->validate(['table_name' => 'Mesa 1', 'status' => 'open', 'total_value' => '9999', 'notes' => '']);
+
+        // Assert
+        $this->assertEmpty($result['errors']);
+        $this->assertFalse(array_key_exists('total_value', $result['data']), 'total da comanda vem dos itens');
+    }
+
+    public function testComputedFieldIsNotRequired(): void
+    {
+        // Arrange
+        $resource = (new CrudFactory())->create('comandas');
+
+        // Act
+        $result = $resource->validate(['table_name' => 'Mesa 1', 'status' => 'open']);
+
+        // Assert
+        $this->assertEmpty($result['errors']);
+        $this->assertSame(['table_name', 'status', 'notes'], array_keys($result['data']));
+    }
+
+    public function testComputedFieldStillFormatsForTheListing(): void
+    {
+        // Arrange
+        $total = (new CrudFactory())->create('comandas')->field('total_value');
+
+        // Act / Assert
+        $this->assertTrue($total->computed);
+        $this->assertSame('R$ 118,00', $total->display(118));
+    }
 }

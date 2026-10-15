@@ -36,6 +36,32 @@ final class OrderRepository extends AbstractCrudRepository
         ];
     }
 
+    /**
+     * No select de itens, a comanda aparece pela mesa e pelo número.
+     */
+    protected function optionLabel(array $row): string
+    {
+        return (string) ($row['table_name'] ?? '') . ' · #' . (int) ($row['id'] ?? 0);
+    }
+
+    /**
+     * O total da comanda é a soma dos subtotais dos itens lançados. Chamado
+     * pelo OrderItemRepository sempre que um item é gravado ou excluído.
+     */
+    public function recalculateTotal(int $orderId): bool
+    {
+        if (! $this->persists()) {
+            return false;
+        }
+
+        // Com prepares nativos o MySQL não aceita o mesmo placeholder duas vezes.
+        return Database::instance()->execute(
+            'UPDATE orders SET total_value = (SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = :items_of)'
+            . ' WHERE id = :id',
+            ['items_of' => $orderId, 'id' => $orderId],
+        );
+    }
+
     public function openOrders(): array
     {
         $database = Database::instance();

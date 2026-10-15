@@ -32,6 +32,25 @@ Para rollback, cada migration precisa ter um arquivo correspondente:
 
 O runner identifica somente arquivos `.sql` que não terminam com `.down.sql` para o comando de subida.
 
+## Migrations atuais
+
+| Arquivo | O que faz |
+| --- | --- |
+| `001_create_users.sql` | usuários e perfis (`operator`, `manager`, `admin`) |
+| `002_create_products.sql` | cardápio |
+| `003_create_orders.sql` | comandas |
+| `004_create_order_items.sql` | itens da comanda (FK para comandas e produtos) |
+| `005_create_stock_movements.sql` | movimentações de estoque (FK para produtos) |
+| `006_create_modules.sql` | catálogo de módulos (pontos de variação) |
+| `007_seed_modules.sql` | carga do catálogo de módulos |
+| `008_create_dining_tables.sql` | mesas |
+| `009_create_customers.sql` | clientes |
+| `010_create_suppliers.sql` | fornecedores |
+| `011_create_payment_methods.sql` | formas de pagamento |
+| `012_create_production_stations.sql` | estações de produção |
+
+Todas têm o `.down.sql` correspondente. Em um banco que já tinha `001` a `007` aplicadas, o próximo `up` aplica só `008` a `012`, num batch novo; um `down` em seguida desfaz exatamente essas cinco.
+
 ## Migrations de dados (seed versionado)
 
 Além das migrations de estrutura, o projeto usa migrations de dados quando um catálogo precisa existir para o sistema funcionar. É o caso de `007_seed_modules.sql`, que popula a tabela `modules` — o catálogo de pontos de variação lido por `App\Domain\Variability\FeatureToggle`.

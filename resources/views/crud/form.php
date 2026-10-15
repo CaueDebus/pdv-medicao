@@ -36,7 +36,15 @@ $action = $id === null
                         <?= htmlspecialchars($field->label, ENT_QUOTES, 'UTF-8') ?>
                     </label>
 
-                    <?php if ($field->type === 'select'): ?>
+                    <?php if ($field->computed): ?>
+                        <?php /* sem name: o valor calculado não volta no POST */ ?>
+                        <input
+                            id="field-<?= htmlspecialchars($field->name, ENT_QUOTES, 'UTF-8') ?>"
+                            type="text"
+                            value="<?= htmlspecialchars($field->display($current), ENT_QUOTES, 'UTF-8') ?>"
+                            readonly
+                        >
+                    <?php elseif ($field->type === 'select'): ?>
                         <select id="field-<?= htmlspecialchars($field->name, ENT_QUOTES, 'UTF-8') ?>" name="<?= htmlspecialchars($field->name, ENT_QUOTES, 'UTF-8') ?>">
                             <?php foreach ($field->options as $value => $label): ?>
                                 <option value="<?= htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') ?>" <?= (string) $current === (string) $value ? 'selected' : '' ?>>

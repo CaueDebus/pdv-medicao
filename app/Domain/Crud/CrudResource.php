@@ -104,6 +104,11 @@ final class CrudResource
         $errors = [];
 
         foreach ($this->fields as $field) {
+            // Campo calculado não vem do formulário, nem se alguém postar o valor.
+            if ($field->computed) {
+                continue;
+            }
+
             $raw = $input[$field->name] ?? null;
 
             if ($field->type === 'toggle') {

@@ -19,8 +19,11 @@ final class CrudFactoryTest extends BaseTest
         // Arrange
         $factory = new CrudFactory();
 
-        // Act / Assert
-        foreach (['cardapio', 'comandas', 'estoque', 'modulos'] as $page) {
+        // Act / Assert — dez telas de CRUD, duas por integrante da equipe
+        $pages = ['cardapio', 'comandas', 'itens', 'mesas', 'clientes', 'estoque', 'fornecedores', 'estacoes', 'pagamentos', 'modulos'];
+        $this->assertCount(10, $pages);
+
+        foreach ($pages as $page) {
             $resource = $factory->create($page);
             $this->assertInstanceOf(CrudResource::class, $resource);
             $this->assertSame($page, $resource->key);
@@ -101,5 +104,62 @@ final class CrudFactoryTest extends BaseTest
         $this->assertTrue($products->canDestroy('manager'));
         $this->assertTrue($products->canDestroy('admin'));
         $this->assertFalse($products->canDestroy('operator'));
+    }
+
+    public function testManagementCatalogsAreWrittenOnlyByManagerAndAdmin(): void
+    {
+        // Arrange
+        $factory = new CrudFactory();
+
+        // Act / Assert
+        foreach (['fornecedores', 'estacoes', 'pagamentos'] as $page) {
+            $resource = $factory->create($page);
+            $this->assertFalse($resource->canWrite('operator'), $page . ': operador só consulta');
+            $this->assertTrue($resource->canWrite('manager'), $page . ': gerente altera');
+            $this->assertTrue($resource->canWrite('admin'), $page . ': admin altera');
+        }
+    }
+
+    public function testOperationalCatalogsAreWrittenByEveryRole(): void
+    {
+        // Arrange
+        $factory = new CrudFactory();
+
+        // Act / Assert
+        foreach (['itens', 'mesas', 'clientes'] as $page) {
+            $resource = $factory->create($page);
+            $this->assertTrue($resource->canWrite('operator'), $page);
+            $this->assertTrue($resource->canWrite('manager'), $page);
+            $this->assertTrue($resource->canWrite('admin'), $page);
+            $this->assertFalse($resource->canDestroy('operator'), $page . ': operador não exclui');
+        }
+    }
+
+    public function testOrderItemSelectsOfferExistingOrdersAndProducts(): void
+    {
+        // Arrange
+        $factory = new CrudFactory();
+
+        // Act
+        $items = $factory->create('itens');
+        $order = $items->field('order_id');
+        $product = $items->field('product_id');
+
+        // Assert — as opções vêm dos repositórios de comandas e produtos
+        $this->assertSame('Mesa 07 · #31', $order->options['31']);
+        $this->assertSame('Batata frita', $product->options['1']);
+        $this->assertNull($items->field('subtotal'), 'subtotal não é campo do formulário');
+    }
+
+    public function testOrderItemValidationRejectsAnUnknownOrder(): void
+    {
+        // Arrange
+        $items = (new CrudFactory())->create('itens');
+
+        // Act
+        $result = $items->validate(['order_id' => '999', 'product_id' => '1', 'qty' => '2', 'unit_price' => '28,00']);
+
+        // Assert
+        $this->assertNotEmpty($result['errors']);
     }
 }

@@ -241,6 +241,9 @@ main{ flex:1; min-width:0; }
   font-family:var(--font-sans); font-size:var(--text-sm); background:var(--panel); color:var(--ink);
 }
 .field input:focus, .field select:focus{ border-color:var(--info); }
+/* Campo calculado (ex.: total da comanda = soma dos itens): lido, nunca digitado. */
+.field input[readonly]{ background:var(--paper-dim); color:var(--ink-soft); border-style:dashed; }
+.field .field-help{ display:block; margin-top:4px; font-size:var(--text-xs); color:var(--muted); }
 
 .stepper{ display:inline-flex; align-items:center; border:var(--border); border-radius:var(--radius-sm); overflow:hidden; }
 .stepper button{ background:var(--paper-dim); border:none; width:36px; height:36px; font-size:var(--text-md); cursor:pointer; }
@@ -524,7 +527,7 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
     <!-- ================= CAMPOS ================= -->
     <section class="section" id="campos">
       <h2>Campos</h2>
-      <p class="lede">Campos de formulário e os dois controles operacionais mais usados no fluxo de venda: contador de quantidade e alternador.</p>
+      <p class="lede">Campos de formulário e os dois controles operacionais mais usados no fluxo de venda: contador de quantidade e alternador. O campo calculado mostra um valor que o sistema deriva (fundo apagado e borda tracejada) e não é enviado no formulário.</p>
       <div class="showcase">
         <div class="showcase-row" style="align-items:flex-start;">
           <div class="field">
@@ -534,6 +537,11 @@ footer{ padding:var(--space-6) var(--space-7); font-size:var(--text-xs); color:v
           <div class="field">
             <label>Categoria</label>
             <select><option>Comida</option><option>Bebida</option></select>
+          </div>
+          <div class="field">
+            <label>Total (calculado)</label>
+            <input type="text" value="R$ 118,00" readonly>
+            <span class="field-help">Soma dos itens lançados na comanda; não é digitado.</span>
           </div>
           <div>
             <label style="display:block; font-size:var(--text-xs); color:var(--muted); margin-bottom:6px;">Quantidade</label>

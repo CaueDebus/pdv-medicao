@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace App\Domain\Patterns\Factory;
 
 use App\Domain\Patterns\Template\AbstractScreenTemplate;
+use App\Domain\Patterns\Template\CustomersTemplate;
 use App\Domain\Patterns\Template\DashboardTemplate;
+use App\Domain\Patterns\Template\DiningTablesTemplate;
 use App\Domain\Patterns\Template\MenuTemplate;
 use App\Domain\Patterns\Template\ModulesTemplate;
+use App\Domain\Patterns\Template\OrderItemsTemplate;
 use App\Domain\Patterns\Template\OrdersTemplate;
+use App\Domain\Patterns\Template\PaymentMethodsTemplate;
+use App\Domain\Patterns\Template\ProductionStationsTemplate;
 use App\Domain\Patterns\Template\ProductionTemplate;
 use App\Domain\Patterns\Template\ReportsTemplate;
 use App\Domain\Patterns\Template\SettingsTemplate;
 use App\Domain\Patterns\Template\StockTemplate;
+use App\Domain\Patterns\Template\SuppliersTemplate;
 
 /**
  * Decide qual Template Method monta a tela pedida.
@@ -36,8 +42,14 @@ final class ScreenFactory
         return match ($page) {
             'cardapio' => new MenuTemplate(),
             'comandas' => new OrdersTemplate(),
+            'itens' => new OrderItemsTemplate(),
+            'mesas' => new DiningTablesTemplate(),
+            'clientes' => new CustomersTemplate(),
             'estoque' => new StockTemplate(),
+            'fornecedores' => new SuppliersTemplate(),
             'producao' => new ProductionTemplate(),
+            'estacoes' => new ProductionStationsTemplate(),
+            'pagamentos' => new PaymentMethodsTemplate(),
             'modulos' => new ModulesTemplate(),
             'relatorios' => new ReportsTemplate(),
             'configuracoes' => new SettingsTemplate(),

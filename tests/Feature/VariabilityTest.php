@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Controllers\PageController;
+use App\Core\Config;
 use App\Domain\Variability\FeatureToggle;
 use App\Repositories\DashboardRepository;
 use App\Repositories\ModuleRepository;
@@ -48,7 +49,8 @@ final class VariabilityTest extends BaseTest
             new ProductRepository(),
             new OrderRepository(),
             new ModuleRepository(),
-            new FeatureToggle($modules, ['estoque' => 'stock', 'producao' => 'production', 'relatorios' => 'reports']),
+            // O mapa real de config/app.php: o teste exercita a configuração entregue.
+            new FeatureToggle($modules, Config::instance()->get('app.features', [])),
         );
     }
 
@@ -90,6 +92,60 @@ final class VariabilityTest extends BaseTest
         $this->assertStringContainsString('?page=cardapio', $html, 'os demais módulos seguem entregues');
     }
 
+    public function testSuppliersScreenIsDeliveredWithTheStockModule(): void
+    {
+        // Arrange
+        $controller = $this->controllerWith(['stock' => true]);
+
+        // Act
+        $html = $controller->render('fornecedores', $this->admin());
+
+        // Assert
+        $this->assertStringContainsString('<title>Fornecedores · ComandaFlex</title>', $html);
+    }
+
+    public function testDisablingStockRemovesStockAndSuppliersTogether(): void
+    {
+        // Arrange
+        $controller = $this->controllerWith(['stock' => false]);
+
+        // Act
+        $suppliers = $controller->render('fornecedores', $this->admin());
+        $dashboard = $controller->render('dashboard', $this->admin());
+
+        // Assert — um módulo, duas telas
+        $this->assertStringContainsString('<title>Dashboard · ComandaFlex</title>', $suppliers);
+        $this->assertStringNotContainsString('?page=fornecedores', $dashboard);
+        $this->assertStringNotContainsString('?page=estoque', $dashboard);
+    }
+
+    public function testStationsScreenIsDeliveredWithTheProductionModule(): void
+    {
+        // Arrange
+        $controller = $this->controllerWith(['production' => true]);
+
+        // Act
+        $html = $controller->render('estacoes', $this->admin());
+
+        // Assert
+        $this->assertStringContainsString('<title>Estações · ComandaFlex</title>', $html);
+    }
+
+    public function testDisablingProductionRemovesStationsToo(): void
+    {
+        // Arrange
+        $controller = $this->controllerWith(['production' => false]);
+
+        // Act
+        $stations = $controller->render('estacoes', $this->admin());
+        $dashboard = $controller->render('dashboard', $this->admin());
+
+        // Assert
+        $this->assertStringContainsString('<title>Dashboard · ComandaFlex</title>', $stations);
+        $this->assertStringNotContainsString('?page=estacoes', $dashboard);
+        $this->assertStringContainsString('?page=mesas', $dashboard, 'telas do núcleo seguem entregues');
+    }
+
     public function testTurningOffReportsAffectsManagerToo(): void
     {
         // Arrange
@@ -107,11 +163,11 @@ final class VariabilityTest extends BaseTest
         // Arrange
         $controller = $this->controllerWith(['stock' => false, 'production' => false, 'reports' => false]);
 
-        // Act
-        $html = $controller->render('comandas', $this->admin());
-
-        // Assert
-        $this->assertStringContainsString('<title>Comandas · ComandaFlex</title>', $html);
+        // Act / Assert
+        foreach (['comandas' => 'Comandas', 'itens' => 'Itens da comanda', 'mesas' => 'Mesas', 'clientes' => 'Clientes', 'pagamentos' => 'Pagamentos'] as $page => $title) {
+            $html = $controller->render($page, $this->admin());
+            $this->assertStringContainsString('<title>' . $title . ' · ComandaFlex</title>', $html);
+        }
     }
 
     public function testSettingsScreenListsTheActiveFeatureMap(): void

@@ -37,4 +37,26 @@ final class OrderRepositoryTest extends BaseTest
         $this->assertSame('Recebido', $queue[0]['stage']);
         $this->assertArrayHasKey('item', $queue[0]);
     }
+
+    public function testOptionsLabelEachOrderByTableAndNumber(): void
+    {
+        // Arrange
+        $repository = new OrderRepository();
+
+        // Act — o gancho optionLabel() troca o rótulo padrão (name)
+        $options = $repository->options();
+
+        // Assert
+        $this->assertCount(3, $options);
+        $this->assertSame('Mesa 07 · #31', $options['31']);
+    }
+
+    public function testRecalculatingTheTotalNeedsTheDatabase(): void
+    {
+        // Arrange
+        $repository = new OrderRepository();
+
+        // Act / Assert — no modo demo nada é recalculado nem gravado
+        $this->assertFalse($repository->recalculateTotal(31));
+    }
 }

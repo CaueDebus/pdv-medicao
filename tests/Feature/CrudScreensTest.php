@@ -10,9 +10,10 @@ use App\Core\Session;
 use Tests\BaseTest;
 
 /**
- * Feature: as quatro telas de CRUD (cardápio, comandas, estoque e módulos)
- * são servidas pelo MESMO controller, pela mesma listagem e pelo mesmo
- * formulário, variando apenas o CrudResource entregue pela CrudFactory.
+ * Feature: as dez telas de CRUD (cardápio, comandas, itens, mesas, clientes,
+ * estoque, fornecedores, estações, pagamentos e módulos) são servidas pelo
+ * MESMO controller, pela mesma listagem e pelo mesmo formulário, variando
+ * apenas o CrudResource entregue pela CrudFactory.
  */
 final class CrudScreensTest extends BaseTest
 {
@@ -33,11 +34,196 @@ final class CrudScreensTest extends BaseTest
         $controller = new PageController();
 
         // Act / Assert
-        foreach (['cardapio', 'comandas', 'estoque', 'modulos'] as $page) {
+        foreach (['cardapio', 'comandas', 'itens', 'mesas', 'clientes', 'estoque', 'fornecedores', 'estacoes', 'pagamentos', 'modulos'] as $page) {
             $html = $controller->render($page, $this->user());
-            $this->assertStringContainsString('class="data-table"', $html);
-            $this->assertStringContainsString('action=create', $html);
+            $this->assertStringContainsString('class="data-table"', $html, $page);
+            $this->assertStringContainsString('action=create', $html, $page);
         }
+    }
+
+    public function testOrderItemsListResolvesOrderAndProductLabels(): void
+    {
+        // Arrange
+        $controller = new PageController();
+
+        // Act
+        $html = $controller->render('itens', $this->user());
+
+        // Assert — a listagem mostra mesa e produto, não os ids crus
+        $this->assertStringContainsString('<title>Itens da comanda · ComandaFlex</title>', $html);
+        $this->assertStringContainsString('Mesa 07 · #31', $html);
+        $this->assertStringContainsString('Chopp 300ml', $html);
+        $this->assertStringContainsString('R$ 120,00', $html, 'indicador "Valor lançado" soma os subtotais');
+    }
+
+    public function testOrderItemFormOffersOrdersAndProducts(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+
+        // Act
+        $html = $controller->form('itens', $this->user('operator'));
+
+        // Assert
+        $this->assertStringContainsString('name="order_id"', $html);
+        $this->assertStringContainsString('name="product_id"', $html);
+        $this->assertStringContainsString('Mesa 03 · #32', $html);
+        $this->assertStringNotContainsString('name="subtotal"', $html);
+    }
+
+    public function testOrderFormShowsTheTotalAsReadOnly(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+
+        // Act
+        $html = $controller->form('comandas', $this->user(), 31);
+
+        // Assert — o total aparece, mas não é campo enviado
+        $this->assertStringContainsString('value="R$ 118,00"', $html);
+        $this->assertStringContainsString('readonly', $html);
+        $this->assertStringNotContainsString('name="total_value"', $html);
+        $this->assertStringContainsString('Soma dos itens lançados', $html);
+    }
+
+    public function testOrdersListStillShowsTheComputedTotal(): void
+    {
+        // Arrange
+        $controller = new PageController();
+
+        // Act
+        $html = $controller->render('comandas', $this->user());
+
+        // Assert
+        $this->assertStringContainsString('<th>Total</th>', $html);
+        $this->assertStringContainsString('R$ 92,00', $html);
+    }
+
+    public function testSavingAnOrderNoLongerAsksForTheTotal(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $redirect = $controller->save('comandas', $this->user('operator'), [
+            '_token' => $token,
+            'table_name' => 'Mesa 20',
+            'status' => 'open',
+            'notes' => '',
+        ]);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert — passa da validação sem total e só para no modo demo
+        $this->assertSame('?page=comandas', $redirect);
+        $this->assertSame('warn', $flash['tone']);
+        $this->assertStringContainsString('Modo demonstração', $flash['message']);
+    }
+
+    public function testDiningTablesFormRendersAreaAndSituationSelects(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+
+        // Act
+        $html = $controller->form('mesas', $this->user(), 3);
+
+        // Assert
+        $this->assertStringContainsString('value="Mesa 07"', $html);
+        $this->assertStringContainsString('Varanda', $html);
+        $this->assertStringContainsString('Reservada', $html);
+    }
+
+    public function testSavingACustomerInDemoModeWarnsThatNothingWasPersisted(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $redirect = $controller->save('clientes', $this->user('operator'), [
+            '_token' => $token,
+            'name' => 'Davi Rocha',
+            'phone' => '(11) 95555-7080',
+            'email' => '',
+            'notes' => '',
+        ]);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert — o operador cadastra cliente; só o modo demo impede gravar
+        $this->assertSame('?page=clientes', $redirect);
+        $this->assertSame('warn', $flash['tone']);
+        $this->assertStringContainsString('Modo demonstração', $flash['message']);
+    }
+
+    public function testSavingACustomerWithoutPhoneReturnsToTheForm(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $redirect = $controller->save('clientes', $this->user(), [
+            '_token' => $token,
+            'name' => 'Davi Rocha',
+            'phone' => '',
+        ]);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertSame('?page=clientes&action=create', $redirect);
+        $this->assertStringContainsString('telefone', $flash['message']);
+    }
+
+    public function testManagementCatalogsFollowTheRoleOfEachProfile(): void
+    {
+        // Arrange
+        $controller = new PageController();
+
+        // Act / Assert — operador consulta; gerente e admin alteram
+        foreach (['fornecedores', 'estacoes', 'pagamentos'] as $page) {
+            $operator = $controller->render($page, $this->user('operator'));
+            $this->assertStringContainsString('somente leitura', $operator, $page . ' operador');
+            $this->assertStringNotContainsString('action=create', $operator, $page . ' operador');
+            $this->assertStringNotContainsString('action=toggle', $operator, $page . ' operador');
+
+            foreach (['manager', 'admin'] as $role) {
+                $html = $controller->render($page, $this->user($role));
+                $this->assertStringContainsString('action=create', $html, $page . ' ' . $role);
+                $this->assertStringContainsString('action=toggle', $html, $page . ' ' . $role);
+                $this->assertStringContainsString('Remover', $html, $page . ' ' . $role);
+            }
+        }
+    }
+
+    public function testOperatorCannotTogglePaymentMethodsEvenPostingDirectly(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $controller->toggle('pagamentos', $this->user('operator'), ['_token' => $token, 'field' => 'active'], 4);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert
+        $this->assertSame('danger', $flash['tone']);
+        $this->assertStringContainsString('não pode alterar', $flash['message']);
+    }
+
+    public function testManagerToggleOfASupplierReachesPersistenceLayer(): void
+    {
+        // Arrange
+        $controller = new CrudController();
+        $token = Session::instance()->csrfToken();
+
+        // Act
+        $controller->toggle('fornecedores', $this->user('manager'), ['_token' => $token, 'field' => 'active'], 3);
+        $flash = Session::instance()->pullFlash();
+
+        // Assert — passa das permissões e só para no modo demo
+        $this->assertSame('warn', $flash['tone']);
+        $this->assertStringContainsString('Modo demonstração', $flash['message']);
     }
 
     public function testCardapioTableListsProductsWithActions(): void

@@ -12,7 +12,7 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 - `reuso-indicadores-do-contexto`: sim, os indicadores de cada tela são calculados do contexto recebido, então nenhum número fica escrito no template.
 - `reuso-template-screens`: sim, as telas compartilham templates de montagem para reduzir repetição.
 - `reuso-acesso-por-perfil`: sim, a navegação e o roteamento diferenciam operador, gerente e admin, cada um com sua estratégia.
-- `reuso-crud-generico`: sim, as quatro telas de CRUD compartilham um único controller, uma única listagem e um único formulário; o que muda é a descrição do recurso.
+- `reuso-crud-generico`: sim, as dez telas de CRUD compartilham um único controller, uma única listagem e um único formulário; o que muda é a descrição do recurso.
 - `reuso-variabilidade-por-modulo`: sim, quais telas o produto entrega é dado da tabela `modules`, não código duplicado por cliente.
 - `reuso-migrations-sql-puro`: sim, o schema é versionado com SQL puro para facilitar leitura, revisão e rollback.
 - `reuso-seed-admin`: sim, o usuário inicial é criado por seed para acelerar a entrada no sistema.
@@ -68,6 +68,7 @@ O objetivo acadêmico aqui é demonstrar que o sistema não foi montado como tel
 - `App\Domain\Patterns\Template\AbstractScreenTemplate`: base para montar cada tela com estrutura consistente.
 - Uma subclasse concreta por tela: `DashboardTemplate`, `MenuTemplate`, `OrdersTemplate`, `StockTemplate`, `ProductionTemplate`, `ModulesTemplate`, `ReportsTemplate` e `SettingsTemplate`. Cada uma calcula seus indicadores e destaques a partir do contexto recebido, então duas telas nunca mostram o mesmo resumo.
 - Os auxiliares de montagem (`metric`, `highlight`, `rows`, `countWhere`, `sumOf`, `money`) ficam `final` na classe base: o template concreto descreve **o que** mostrar, nunca **como** montar.
+- As telas de cadastro que entraram depois (`OrderItemsTemplate`, `DiningTablesTemplate`, `CustomersTemplate`, `SuppliersTemplate`, `ProductionStationsTemplate`, `PaymentMethodsTemplate`) seguem a mesma regra e usam mais dois auxiliares `final`: `crudRows` (as linhas que a própria listagem de CRUD exibe, sem uma segunda consulta) e `countFilled` (quantas linhas têm o campo preenchido).
 - Decisão registrada: havia um único `OperationsTemplate` atendendo cardápio, comandas, estoque, produção e módulos com números fixos — as cinco telas ficavam idênticas nos painéis de resumo. Ele foi substituído pelas subclasses específicas, e o texto de cada tela passou a viver no seu próprio template (a `ScreenFactory` só escolhe, não descreve mais), eliminando a segunda fonte de verdade.
 
 ## Dados reais x fallback demo
@@ -83,6 +84,23 @@ Consequências registradas:
 - Nenhum indicador de tela é constante: todos saem do contexto montado pelo `PageController`.
 - Dados operacionais de exemplo, quando desejados, entram por seed explícito (`scripts/seed_sample_data.php`) e não por fallback silencioso.
 - `App\Repositories\AbstractCrudRepository`: segunda aplicação do padrão, agora na persistência. O esqueleto de listar, buscar, gravar e excluir é `final`; cada repositório concreto só informa tabela, colunas, ordenação e dados de demonstração.
+- Dois ganchos novos entraram com os CRUDs de itens, mesas, clientes, fornecedores, estações e pagamentos, sem abrir o esqueleto:
+  - `beforeSave()`: deriva colunas antes da gravação. O `OrderItemRepository` calcula `subtotal = qty × unit_price`, então o subtotal nunca vem do formulário e nunca diverge.
+  - `optionLabel()`: rótulo de cada registro nos selects de outras telas. O `options()` saiu do `ProductRepository` e subiu para a base como `final`; o `OrderRepository` só troca o rótulo para "Mesa 07 · #31".
+- Um terceiro gancho fecha o ciclo do pedido: `afterWrite($before, $data)`, chamado pela base só depois de um `create`, `update` ou `delete` bem-sucedido. Ele recebe o registro como era antes (lido pela base antes de alterar ou excluir) e os dados gravados.
+  - O `OrderItemRepository` usa o gancho para pedir ao `OrderRepository::recalculateTotal()` o total das comandas afetadas: a de antes e a de depois, porque na edição um item pode trocar de comanda.
+  - O total passa a ter uma fonte só, a soma dos itens. Antes ele era digitado e podia divergir.
+  - Decisão: o recálculo fica no repositório de comandas (dono da tabela `orders`), e não no controller genérico, que continua sem conhecer nenhuma entidade. Também não foi usado trigger no banco, para a regra ficar visível no código e coberta por teste.
+
+### Campo calculado (`CrudField::computed`)
+
+O total da comanda deixou de ser digitado, mas continua precisando aparecer na listagem e no formulário. Em vez de um tratamento especial para comandas, o `CrudField` ganhou a variação `computed`:
+
+- `CrudResource::validate()` ignora o campo, mesmo que alguém poste o valor na mão.
+- `crud/form.php` mostra o valor formatado em um input `readonly` e **sem** `name`, então ele nem volta no POST.
+- `crud/table.php` não mudou: o campo segue na listagem como qualquer outro.
+
+O estado visual do campo só leitura (fundo apagado e borda tracejada) foi registrado no protótipo [ComandaFlex_Design_System.html](../ComandaFlex_Design_System.html), na seção Campos. Qualquer outro valor derivado, em qualquer CRUD, reaproveita a mesma variação.
 
 ### Factory
 
@@ -91,7 +109,7 @@ Consequências registradas:
 
 ### Repository
 
-- `DashboardRepository`, `ProductRepository`, `OrderRepository`, `StockMovementRepository`, `ModuleRepository`, `UserRepository`: isolam persistência e permitem trocar o fallback por MySQL sem mexer na camada de tela.
+- `DashboardRepository`, `ProductRepository`, `OrderRepository`, `OrderItemRepository`, `DiningTableRepository`, `CustomerRepository`, `StockMovementRepository`, `SupplierRepository`, `ProductionStationRepository`, `PaymentMethodRepository`, `ModuleRepository`, `UserRepository`: isolam persistência e permitem trocar o fallback por MySQL sem mexer na camada de tela.
 - `App\Repositories\Contracts\CrudRepository`: contrato mínimo (`all`, `find`, `create`, `update`, `delete`, `persists`) que o controller genérico consome.
 
 ### Strategy
@@ -101,7 +119,7 @@ Consequências registradas:
 
 ## CRUD genérico
 
-As telas de cardápio, comandas, estoque e módulos são CRUD completo sobre MySQL e **não** têm controller nem view próprios:
+As dez telas de cadastro (cardápio, comandas, itens da comanda, mesas, clientes, estoque, fornecedores, estações, pagamentos e módulos) são CRUD completo sobre MySQL e **não** têm controller nem view próprios:
 
 - `App\Domain\Crud\CrudField` descreve um campo (rótulo, tipo, opções, obrigatoriedade) e sabe formatar e converter o valor.
 - `App\Domain\Crud\CrudResource` junta repositório + campos + regra de exclusão por perfil, e concentra a validação.
@@ -111,6 +129,25 @@ As telas de cardápio, comandas, estoque e módulos são CRUD completo sobre MyS
 Consequência prática: **adicionar um CRUD novo é adicionar um método na `CrudFactory`** — sem controller novo, sem view nova, sem SQL novo.
 
 Cuidados de segurança adotados: as colunas graváveis são lista branca declarada no repositório (nada que venha do formulário entra no SQL sem estar declarado), todos os valores vão por prepared statement, a saída é escapada com `htmlspecialchars` e toda escrita exige token CSRF de sessão.
+
+### Expansão para dez CRUDs (duas telas por integrante)
+
+A equipe tem cinco integrantes e o requisito é de duas telas de CRUD por integrante. As seis telas novas foram feitas sem controller, view ou SQL novos. O que cada uma reaproveita:
+
+| Tela nova | Tabela | Reaproveita | Código próprio |
+| --- | --- | --- | --- |
+| Itens da comanda | `order_items` (já existia) | controller, views, base de repositório, `options()` de comandas e produtos | JOIN em `selectSql()`, subtotal em `beforeSave()`, template |
+| Mesas | `dining_tables` | controller, views, base de repositório | opções de área e situação, template |
+| Clientes | `customers` | controller, views, base de repositório | template |
+| Fornecedores | `suppliers` | controller, views, base de repositório, toggle em um clique, módulo `stock` | template |
+| Estações | `production_stations` | controller, views, base de repositório, toggle em um clique, módulo `production` | opções de setor, template |
+| Pagamentos | `payment_methods` | controller, views, base de repositório, toggle em um clique | opções de tipo, template |
+
+Em todas: layout e navegação compartilhados, a Strategy do perfil e os componentes do protótipo (tabela, formulário, cartões de indicador, pílulas e chip de liga/desliga). Nenhum componente visual novo foi criado. A única mudança de CSS é a barra lateral rolar quando o menu passa da altura da tela (`overflow-y: auto`), já que o menu foi de 8 para 14 itens.
+
+Permissões: itens, mesas e clientes são operação, e qualquer perfil grava. Fornecedores, estações e formas de pagamento são cadastros de gestão, com `writeRoles` de gerente e admin; o operador vê a tela como somente leitura. A exclusão segue o padrão (gerente e admin).
+
+Dados de exemplo: `scripts/seed_sample_data.php` passou a semear cada tabela de forma independente, só quando ela está vazia. Assim, uma instalação que já tinha rodado o seed completa as tabelas novas sem duplicar as antigas.
 
 ## Variabilidade (Linha de Produto de Software)
 
@@ -122,7 +159,7 @@ O ponto de variação do ComandaFlex é a tabela `modules`: cada linha é uma fe
 
 Dois níveis de variabilidade são exercitados:
 
-1. **Grossa (tela):** desligar o módulo `stock` remove a tela de Estoque da navegação e do roteamento — sem remover código e sem criar uma variante paralela do sistema.
+1. **Grossa (tela):** desligar o módulo `stock` remove a tela de Estoque da navegação e do roteamento — sem remover código e sem criar uma variante paralela do sistema. Um módulo pode entregar mais de uma tela: `stock` entrega Estoque e Fornecedores, e `production` entrega Produção e Estações. Bastou uma entrada a mais no mapa `app.features` para cada tela nova, sem módulo novo e sem `if`.
 2. **Fina (campo):** as categorias ofertadas no cadastro de produto dependem dos módulos de venda ligados. Com `menu_drink` desligado, "Bebida" deixa de ser uma opção do formulário.
 
 A tela de Módulos é o próprio painel de configuração do produto: é um CRUD como os outros, e o que ele edita é a composição da instalação.

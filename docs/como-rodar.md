@@ -69,7 +69,9 @@ a aplicação já abrir com conteúdo:
 php scripts/seed_sample_data.php
 ```
 
-O script é seguro de repetir: se o cardápio já tiver registros, ele não insere nada.
+O script é seguro de repetir: cada tabela é semeada de forma independente e só quando está vazia, então ele nunca duplica registros.
+
+**Já tinha o banco montado antes das telas de mesas, clientes, fornecedores, estações e pagamentos?** Rode de novo `php scripts/migrate.php up` (as migrations `008` a `012` entram como um batch novo) e depois `php scripts/seed_sample_data.php`. O seed completa só as tabelas novas e informa "já tem registros" nas antigas.
 Sem ele o sistema funciona normalmente — as telas apenas mostram
 "Nenhum registro cadastrado ainda" até você cadastrar pela interface.
 
@@ -109,16 +111,22 @@ mysql -u root comandaflex -e "SELECT status, COUNT(*) FROM orders GROUP BY statu
 
 ## Telas de CRUD
 
-Quatro telas fazem CRUD completo sobre o MySQL, todas servidas pelo mesmo controller e pelas mesmas views:
+Dez telas fazem CRUD completo sobre o MySQL, todas servidas pelo mesmo controller e pelas mesmas views:
 
 | Tela | Tabela | Observação |
 | --- | --- | --- |
 | Cardápio | `products` | categorias dependem dos módulos de venda ligados |
-| Comandas | `orders` | status vem do enum da migration |
+| Comandas | `orders` | status vem do enum da migration; total é a soma dos itens (só leitura) |
+| Itens da comanda | `order_items` | JOIN em comandas e produtos; subtotal calculado na gravação; cada gravação recalcula o total da comanda |
+| Mesas | `dining_tables` | área, lugares e situação (livre, ocupada, reservada) |
+| Clientes | `customers` | telefone obrigatório; e-mail e observações opcionais |
 | Estoque | `stock_movements` | lista com JOIN em `products` |
+| Fornecedores | `suppliers` | some junto com o Estoque quando o módulo `stock` é desligado |
+| Estações | `production_stations` | some junto com a Produção quando o módulo `production` é desligado |
+| Pagamentos | `payment_methods` | formas aceitas no caixa |
 | Módulos | `modules` | é o painel de variabilidade do produto |
 
-Permissões: cardápio, comandas e estoque podem ser editados por qualquer perfil autenticado, e a exclusão exige `manager` ou `admin`. A tela de Módulos é inteira restrita ao `admin` — para os outros perfis ela é somente leitura.
+Permissões: cardápio, comandas, itens, mesas, clientes e estoque podem ser editados por qualquer perfil autenticado. Fornecedores, estações e pagamentos só são alterados por `manager` ou `admin`; para o operador ficam somente leitura. A exclusão exige `manager` ou `admin`. A tela de Módulos é inteira restrita ao `admin` — para os outros perfis ela é somente leitura.
 
 Campos de liga/desliga (como o `enabled` dos módulos) são alternáveis em um clique direto na listagem, sem abrir o formulário.
 
@@ -128,7 +136,7 @@ A migration `007_seed_modules.sql` popula o catálogo de módulos. Para ver a va
 
 1. Entre como `admin` e abra a tela **Módulos**.
 2. **Clique no chip** verde do "Módulo Estoque" (o próprio chip é o interruptor).
-3. Sem recarregar a página, o chip apaga e a tela de Estoque some do menu lateral. A rota passa a cair no dashboard.
+3. Sem recarregar a página, o chip apaga e as telas de Estoque e de Fornecedores somem do menu lateral. As duas rotas passam a cair no dashboard.
 4. Clique no chip de novo para trazer a tela de volta.
 
 É o melhor momento para demonstrar a variabilidade: dá para ver o menu mudar ao vivo, sem sair da tela.

@@ -62,6 +62,34 @@ abstract class AbstractScreenTemplate
     }
 
     /**
+     * Linhas da listagem de CRUD da tela. Telas de cadastro calculam seus
+     * indicadores sobre o mesmo resultado que a tabela exibe, sem uma
+     * segunda consulta ao banco.
+     *
+     * @param array<string, mixed> $context
+     * @return array<int, array<string, mixed>>
+     */
+    final protected function crudRows(array $context): array
+    {
+        $crud = $context['crud'] ?? [];
+
+        return is_array($crud) ? $this->rows($crud, 'rows') : [];
+    }
+
+    /**
+     * Conta as linhas em que o campo foi preenchido.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     */
+    final protected function countFilled(array $rows, string $field): int
+    {
+        return count(array_filter(
+            $rows,
+            static fn (array $row): bool => trim((string) ($row[$field] ?? '')) !== '',
+        ));
+    }
+
+    /**
      * Conta as linhas cujo campo tem um dos valores informados.
      *
      * @param array<int, array<string, mixed>> $rows

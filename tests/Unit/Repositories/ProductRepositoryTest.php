@@ -38,4 +38,16 @@ final class ProductRepositoryTest extends BaseTest
         $this->assertSame('Caipirinha', $lowStock[0]['name']);
         $this->assertTrue($lowStock[0]['stock_qty'] < 20);
     }
+
+    public function testOptionsMapEachProductIdToItsName(): void
+    {
+        // Arrange
+        $repository = new ProductRepository();
+
+        // Act — options() é herdado do AbstractCrudRepository
+        $options = $repository->options();
+
+        // Assert
+        $this->assertSame(['1' => 'Batata frita', '2' => 'Caipirinha', '3' => 'Chopp 300ml'], $options);
+    }
 }

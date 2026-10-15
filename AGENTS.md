@@ -45,7 +45,7 @@ O sistema ComandaFlex deve evoluir com o menor acoplamento possível entre camad
 
 ### Repository
 
-- Uso atual: persistência de produtos, comandas, movimentações de estoque, módulos, usuários e leitura do dashboard.
+- Uso atual: persistência de produtos, comandas, itens da comanda, mesas, clientes, movimentações de estoque, fornecedores, estações de produção, formas de pagamento, módulos, usuários e leitura do dashboard.
 - Importância: separa consulta de dados da regra de apresentação e facilita troca de fallback por MySQL real.
 
 ### Strategy
@@ -64,7 +64,9 @@ O sistema ComandaFlex deve evoluir com o menor acoplamento possível entre camad
 
 - Não crie controller nem view por entidade. Um CRUD novo é um método novo na `App\Domain\Patterns\Factory\CrudFactory` devolvendo um `CrudResource`.
 - Colunas graváveis são lista branca no repositório; valores sempre por prepared statement; saída sempre escapada; escrita sempre com token CSRF.
-- Repositório de CRUD estende `AbstractCrudRepository` e implementa apenas `table()`, `columns()`, `demoRows()` e, quando necessário, `orderBy()`/`selectSql()`.
+- Repositório de CRUD estende `AbstractCrudRepository` e implementa apenas `table()`, `columns()`, `demoRows()` e, quando necessário, os ganchos `orderBy()`, `selectSql()`/`idColumn()` (JOIN), `beforeSave()` (coluna derivada, como subtotal), `afterWrite()` (dado derivado em outra tabela, como o total da comanda; só roda se a escrita deu certo) e `optionLabel()` (rótulo nos selects de outras telas).
+- Valor que o sistema calcula vira `CrudField::computed()`: aparece na listagem e no formulário só para leitura, e o `CrudResource::validate()` nunca o aceita da entrada.
+- Tela de CRUD nova também ganha rota em `config/app.php`, entrada em `PageController::allowedPagesForRole()` e template próprio na `ScreenFactory`, com indicadores calculados por `crudRows()`.
 
 ## Testes
 

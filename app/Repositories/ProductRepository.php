@@ -37,20 +37,4 @@ final class ProductRepository extends AbstractCrudRepository
     {
         return array_values(array_filter($this->all(), static fn (array $product): bool => ($product['stock_qty'] ?? 0) < 20));
     }
-
-    /**
-     * Pares id => nome, usados pelos selects de outras telas (ex.: estoque).
-     *
-     * @return array<string, string>
-     */
-    public function options(): array
-    {
-        $options = [];
-
-        foreach ($this->all() as $product) {
-            $options[(string) ($product['id'] ?? '')] = (string) ($product['name'] ?? '');
-        }
-
-        return $options;
-    }
 }

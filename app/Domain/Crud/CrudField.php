@@ -15,6 +15,8 @@ final class CrudField
 {
     /**
      * @param array<string, string> $options pares valor => rótulo para o tipo select
+     * @param bool $computed valor derivado pelo sistema: aparece na listagem e no
+     *                       formulário só para leitura, e nunca é aceito da entrada
      */
     public function __construct(
         public readonly string $name,
@@ -23,7 +25,16 @@ final class CrudField
         public readonly array $options = [],
         public readonly bool $required = true,
         public readonly string $help = '',
+        public readonly bool $computed = false,
     ) {
+    }
+
+    /**
+     * Campo calculado pelo sistema (ex.: total da comanda = soma dos itens).
+     */
+    public static function computed(string $name, string $label, string $type = 'text', string $help = ''): self
+    {
+        return new self($name, $label, $type, [], false, $help, true);
     }
 
     /**
